@@ -1,7 +1,7 @@
 import io
 import numpy as np
 import pandas as pd
-from markov import MarkovContinous
+from .markov import MarkovContinous
 
 def convert_to_markov(df, worst_IC, best_IC):
     column = df.keys()
