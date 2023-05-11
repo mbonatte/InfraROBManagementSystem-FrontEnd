@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS, cross_origin
-from prediction.handle_prediction import get_IC_through_time
+from prediction import handle_prediction
 
 import json
 
@@ -26,9 +26,9 @@ def upload():
     csv_data = csv_file.read().decode('utf-8')
     additionalInfo = json.loads(request.form['additionalInfo'])
     
-    #json_data = get_IC_through_time(csv_data,
-                                    #additionalInfo['worst_IC'],
-                                    #additionalInfo['best_IC'])
+    #json_data = handle_prediction.get_IC_through_time(csv_data,
+                                                      #additionalInfo['worst_IC'],
+                                                      #additionalInfo['best_IC'])
     json_data = {'test': 'asd'}
     response = jsonify(json_data)
     #response.content_type = 'application/json'
