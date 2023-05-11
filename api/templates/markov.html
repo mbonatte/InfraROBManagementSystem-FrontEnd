@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <input type="file" id="csvFile" accept=".csv">
+    <button id="uploadBtn">Upload</button>
+    <div id="response"></div>
+	<canvas id="myChart"></canvas>
+	<script>
+      const uploadBtn = document.getElementById('uploadBtn');
+      const csvFile = document.getElementById('csvFile');
+      const responseDiv = document.getElementById('response');
+
+      uploadBtn.addEventListener('click', () => {
+		const formData = new FormData();
+        formData.append('csvFile', csvFile.files[0]);	
+		const additionalInfo = {worst_IC: 5, best_IC: 1}
+		formData.append('additionalInfo', JSON.stringify(additionalInfo));
+
+		fetch('http://127.0.0.1:5000/markov', {
+			method: 'POST',
+			body: formData
+		})
+		.then(response => response.json())
+		.then(data => {
+		// Display the JSON response in the result div
+		responseDiv.innerHTML = JSON.stringify(data);
+		console.log(JSON.stringify(data))
+		createChart(data);
+		})
+		.catch(error => console.error(error));
+	  });
+	  
+	  
+	  function createChart(data) {
+	  // Create a Chart.js chart
+	  const ctx = document.getElementById('myChart').getContext('2d');
+	  console.log(data)
+	  console.log(data.IC)
+	  const myChart = new Chart(ctx, {
+		type: 'line',
+		data: {
+		  labels: data.Year,
+		  datasets: [{
+			label: 'My Data',
+			data: data.IC,
+			backgroundColor: 'rgba(255, 99, 132, 0.2)',
+			borderColor: 'rgba(255, 99, 132, 1)',
+			borderWidth: 1
+		  }]
+		}});
+		}
+
+    </script>
+{% endblock %}
+	
