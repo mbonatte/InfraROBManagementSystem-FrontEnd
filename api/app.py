@@ -3,7 +3,7 @@ import json
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS, cross_origin
 
-#from api.prediction.handle_prediction import get_IC_through_time
+from api.prediction.handle_prediction import get_IC_through_time
 
 app = Flask(__name__)
 CORS(app)
