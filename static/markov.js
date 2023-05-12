@@ -31,7 +31,6 @@ institution.addEventListener('change', function() {
 
 function getWorstBestIC(){
 	const institution = getInstitution();
-	console.log(institution);
 	if (institution === 'ASFiNAG') {
 		return {worst_IC: 5,
 				best_IC: 1
@@ -63,6 +62,11 @@ runBtn.addEventListener('click', () => {
 		const maintenanceFile = document.getElementById('maintenanceFile');
 		formData.append('maintenanceFile', maintenanceFile.files[0]);
 		formData.append('maintenanceScenario', JSON.stringify(getMaintenanceScenario()));
+	}
+	
+	if (window.location.pathname === '/optimization'){
+		const maintenanceFile = document.getElementById('maintenanceFile');
+		formData.append('maintenanceFile', maintenanceFile.files[0]);
 	}
 
 	fetch(window.location.pathname, {

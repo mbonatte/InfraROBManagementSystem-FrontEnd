@@ -1,0 +1,12 @@
+{% extends 'markov.html' %}
+
+
+{% block maintenance_block %}
+	<h2> Import maintenance </h2>
+	<div id="action-download-div">
+	  <li><a href="/database/actionseffect" download>Download an example of a Action Effect database</a></li>
+	</div>
+	<input type="file" id="maintenanceFile" accept=".json">
+	<hr>
+<script src="{{url_for('static', filename='optimization.js')}}"></script>
+{% endblock %}

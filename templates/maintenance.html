@@ -2,12 +2,13 @@
 
 
 {% block maintenance_block %}
-	<h1> Import maintenance </h1>
+	<h2> Import maintenance </h2>
 	<div id="action-download-div">
-	  <a href="/database/actionseffect" download>Download an example of a Action Effect database</a>
+	  <li><a href="/database/actionseffect" download>Download an example of a Action Effect database</a></li>
 	</div>
 	<input type="file" id="maintenanceFile" accept=".json">
-	<h1> Maintenance scenario </h1>
+	<hr>
+	<h2> Maintenance scenario </h2>
 	<select id="number-maintenance"  onchange="addSelectFields()">
 		<option value="">Select the number of maintenance actions:</option>
 		<option value="1">1</option>
@@ -22,6 +23,7 @@
 		<option value="9">9</option>
     </select>
 	<div id="maintenance-scenarios"></div>
+	<hr>
 <script src="{{url_for('static', filename='maintenance.js')}}"></script>
 {% endblock %}
 	
