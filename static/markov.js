@@ -2,7 +2,6 @@ const runBtn = document.getElementById('runBtn');
 const inspectionsFile = document.getElementById('inspectionsFile');
 const responseDiv = document.getElementById('response');
 const institution = document.getElementById('institution');
-const worst_best_IC_div = document.getElementById('worst-best-IC-div');
 
 function getInstitution(){
 	return institution.value
@@ -17,11 +16,17 @@ function getTimeHorizon(){
 }
 
 institution.addEventListener('change', function() {
-  if (this.value === 'Generic') {
-    worst_best_IC_div.style.display = 'block';
-  } else {
-    worst_best_IC_div.style.display = 'none';
-  }
+	const worst_best_IC_div = document.getElementById('worst-best-IC-div');
+	const asfinag_download_div = document.getElementById('asfinag-download-div');
+	
+	worst_best_IC_div.style.display = 'none';
+	asfinag_download_div.style.display = 'none';
+	if (this.value === 'Generic') {
+		worst_best_IC_div.style.display = 'block';
+	}
+	else if (this.value === 'ASFiNAG') {
+		asfinag_download_div.style.display = 'block';		
+	}
 });
 
 function getWorstBestIC(){
@@ -49,13 +54,18 @@ function getWorstBestIC(){
 
 runBtn.addEventListener('click', () => {
 	const formData = new FormData();
-	formData.append('inspectionsFile', inspectionsFile.files[0]);	
+	formData.append('inspectionsFile', inspectionsFile.files[0]);
 	formData.append('worst_best_IC', JSON.stringify(getWorstBestIC()));
 	formData.append('time_block', JSON.stringify(getTimeBlock()));
 	formData.append('time_horizon', JSON.stringify(getTimeHorizon()));
 	
+	if (window.location.pathname === '/maintenance'){
+		const maintenanceFile = document.getElementById('maintenanceFile');
+		formData.append('maintenanceFile', maintenanceFile.files[0]);
+		formData.append('maintenanceScenario', JSON.stringify(getMaintenanceScenario()));
+	}
 
-	fetch('http://127.0.0.1:5000/markov', {
+	fetch(window.location.pathname, {
 		method: 'POST',
 		body: formData
 	})
@@ -72,36 +82,45 @@ runBtn.addEventListener('click', () => {
 
 function createChart(data) {
 	// Create a Chart.js chart
-	const ctx = document.getElementById('myChart').getContext('2d');
-	const myChart = new Chart(ctx, {
-	type: 'line',
-	data: {
-	  labels: data.Year,
-	  datasets: [{
-		label: 'Markov prediction',
-		data: data.IC,
-		backgroundColor: 'rgba(255, 99, 132, 0.2)',
-		borderColor: 'rgba(255, 99, 132, 1)',
-		borderWidth: 1
-	  }]
-	},
-	options: {
-	  responsive: true,
-	  scales: {
-		x: {
-		  title: {
-            display: true,
-            text: getTimeBlock(),
-		  }
-		},
-		y: {
-		  title: {
-            display: true,
-            text: 'IC',
-		  }
-		},
-	  },
-      //maintainAspectRatio: false
-	}
-	});
+	let myChart = Chart.getChart('myChart');
+	if (myChart) {
+		// If the chart already exists, update it with new data
+		myChart.data.labels = data.Year;
+		myChart.data.datasets[0].data = data.IC;
+		myChart.update();
+	} else {
+		// If the chart doesn't exist, create a new one
+		const ctx = document.getElementById('myChart').getContext('2d');
+		const myChart = new Chart(ctx, {
+			type: 'line',
+			data: {
+			  labels: data.Year,
+			  datasets: [{
+				label: 'Markov prediction',
+				data: data.IC,
+				backgroundColor: 'rgba(255, 99, 132, 0.2)',
+				borderColor: 'rgba(255, 99, 132, 1)',
+				borderWidth: 1
+			  }]
+			},
+			options: {
+			  responsive: true,
+			  scales: {
+				x: {
+				  title: {
+					display: true,
+					text: getTimeBlock(),
+				  }
+				},
+				y: {
+				  title: {
+					display: true,
+					text: 'IC',
+				  }
+				},
+			  },
+			  //maintainAspectRatio: false
+			}
+		}
+	)};
 }

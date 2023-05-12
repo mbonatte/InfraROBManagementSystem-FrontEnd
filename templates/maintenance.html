@@ -1,0 +1,27 @@
+{% extends 'markov.html' %}
+
+
+{% block maintenance_block %}
+	<h1> Import maintenance </h1>
+	<div id="action-download-div">
+	  <a href="/database/actionseffect" download>Download an example of a Action Effect database</a>
+	</div>
+	<input type="file" id="maintenanceFile" accept=".json">
+	<h1> Maintenance scenario </h1>
+	<select id="number-maintenance"  onchange="addSelectFields()">
+		<option value="">Select the number of maintenance actions:</option>
+		<option value="1">1</option>
+		<option value="2">2</option>
+		<option value="3">3</option>
+		<option value="4">4</option>
+		<option value="5">5</option>
+		<option value="6">6</option>
+		<option value="7">7</option>
+		<option value="7">8</option>
+		<option value="8">8</option>
+		<option value="9">9</option>
+    </select>
+	<div id="maintenance-scenarios"></div>
+<script src="{{url_for('static', filename='maintenance.js')}}"></script>
+{% endblock %}
+	
