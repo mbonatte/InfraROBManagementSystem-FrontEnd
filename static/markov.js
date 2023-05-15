@@ -80,7 +80,12 @@ runBtn.addEventListener('click', () => {
 	.then(data => {
 	// Display the JSON response in the result div
 	console.log(JSON.stringify(data))
-	createChart(data);
+	if (window.location.pathname !== '/optimization'){
+		createChart('myChart', data.Year, data.IC, getTimeBlock(), 'IC', 'Markov prediction');
+	}
+	else {
+		createChart('myChart', data.Performance, data.Cost, 'Performance', 'Cost', `Pareto curve - ${result_id}`);
+	}
 	})
 	.catch(error => console.error(error));
 });
@@ -93,24 +98,24 @@ function changeDivResponse(result_id){
 	responseDiv.innerHTML = warning
 };
 
-function createChart(data) {
+function createChart(canvas_name, data_x, data_y, x_label, y_label, data_title) {
 	// Create a Chart.js chart
-	let myChart = Chart.getChart('myChart');
+	let myChart = Chart.getChart(canvas_name);
 	if (myChart) {
 		// If the chart already exists, update it with new data
-		myChart.data.labels = data.Year;
-		myChart.data.datasets[0].data = data.IC;
+		myChart.data.labels = data_x;
+		myChart.data.datasets[0].data = data_y;
 		myChart.update();
 	} else {
 		// If the chart doesn't exist, create a new one
-		const ctx = document.getElementById('myChart').getContext('2d');
+		const ctx = document.getElementById(canvas_name).getContext('2d');
 		const myChart = new Chart(ctx, {
 			type: 'line',
 			data: {
-			  labels: data.Year,
+			  labels: data_x,
 			  datasets: [{
-				label: 'Markov prediction',
-				data: data.IC,
+				label: data_title,
+				data: data_y,
 				backgroundColor: 'rgba(255, 99, 132, 0.2)',
 				borderColor: 'rgba(255, 99, 132, 1)',
 				borderWidth: 1
@@ -122,13 +127,13 @@ function createChart(data) {
 				x: {
 				  title: {
 					display: true,
-					text: getTimeBlock(),
+					text: x_label,
 				  }
 				},
 				y: {
 				  title: {
 					display: true,
-					text: 'IC',
+					text: y_label,
 				  }
 				},
 			  },

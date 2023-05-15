@@ -1,0 +1,4 @@
+Road_Name;Section_Name;Construction_Type;Street_Category;Age;Length;Width;Asphalt_Thickness;Traffic_Load;Design_Period;Frost_Index;Cumulative_Load
+Road_1;Road_1_Section_01;AS_N;Highway;10;200;7,5;2;1;30;1;70
+Road_2;Road_2_Section_01;AS_N;Highway;4;200;7,5;2;0,9;35;0,8;45
+Road_COST354;Road_COST354;AS_N;Primary;0;5000;7,5;2;-;-;-;-

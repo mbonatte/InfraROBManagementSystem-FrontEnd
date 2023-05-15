@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<script>
+window.MathJax = {
+  tex: {
+    tags: 'ams'
+  }
+};
+</script>
+<manual>
+	<h1>Deterioration model</h1>
+	
+	<h2>Overview</h2>
+	
+	<p>Developing analytical models to estimate pavement evolution over time is an essential aspect of pavement management. These models can predict pavement conditions and help inform maintenance and rehabilitation decisions.</p>
+	<p>Several types of analytical models are used in pavement management, including empirical models, mechanistic-empirical models, and artificial neural network models. Empirical models are based on statistical relationships between pavement performance and pavement distresses. Mechanistic-empirical models use more detailed information on pavement structure and loading to predict pavement performance. Artificial neural network models use machine learning techniques to predict pavement performance based on input data.</p>
+	<p>Data on pavement condition, traffic volume, environmental factors, and other relevant parameters are collected to develop and calibrate these models. The data is then used to calibrate the model and validate its accuracy. Once the model has been calibrated and validated, it can predict future pavement performance under different scenarios, such as traffic volumes or maintenance strategies.</p>
+	<p>Developing accurate analytical models is crucial for effective pavement management, as it allows decision-makers to plan maintenance and rehabilitation activities cost-effectively and timely.</p>
+	
+	<h2>Markov</h2>
+	<p>Markov Chain models are a popular analytical tool used in pavement management for estimating pavement conditions over time. Markov Chain models are a stochastic process that models the probability of transitioning from one state to another over time. </p>
+	<p>Based on the transition probabilities between states, the Markov Chain model can estimate the probability of transitioning from one pavement condition state to another over a given period. These transition probabilities can be estimated using historical pavement condition data and pavement management information, such as pavement distress surveys and maintenance records.</p>
+	<p>The Markov Chain model can be represented as a transition matrix. Each matrix element represents the probability of transitioning from one state to another in a given period. The transition matrix is multiplied by the current pavement condition vector to obtain the predicted pavement condition vector for the next period.</p>
+	<p>The predicted pavement condition vector can then inform maintenance and rehabilitation decisions. For example, suppose the predicted pavement condition vector indicates a high probability of transitioning to a worse pavement condition state. In that case, it may be more cost-effective to perform maintenance or rehabilitation activities earlier to prevent further deterioration and avoid more costly repairs in the future.</p>
+	<p>One advantage of Markov Chain models is their ability to incorporate uncertainty and variability into the pavement condition estimation. The stochastic nature of the model allows for probabilistic predictions, which can help decision-makers assess the risk associated with different maintenance and rehabilitation strategies.</p>
+	<p>Markov Chain models are a valuable analytical tool for estimating pavement conditions over time and informing pavement management decisions. They allow decision-makers to make more informed and cost-effective decisions regarding maintenance and rehabilitation activities, ultimately improving the overall condition and longevity of the pavement network.</p>
+	
+	<h2>Mathematical theory</h2>
+	<p>The Markov model simplifies the transition probability by defining that the next state only depends on the current state and not on the sequence of preceding ones, as illustrated in Equation (\ref{eq:ConditionProbability}).</p>
+	\begin{equation}
+		P(X_{t+1} = j \mid X_{t} = i) = P(i,j)
+		\label{eq:ConditionProbability}
+	\end{equation}
+	<p>The values assumed by \(i\) and \(j\) are called condition states.</p>
+	
+	<p>A Markov deterioration matrix presents the probability that a bridge will shift condition within a specified period, generally considered the time between two central inspections. An example of a Markov deterioration process based on a five-condition state model, with 5 as the best.</p>	
+    \begin{equation}
+		P = \begin{bmatrix}
+		P_{55} & P_{54} & P_{53} & P_{52} & P_{51}\\
+		0      & P_{44} & P_{43} & P_{42} & P_{41}\\
+		0      & 0      & P_{33} & P_{32} & P_{31}\\
+		0      & 0      & 0      & P_{22} & P_{21}\\
+		0      & 0      & 0      & 0      & P_{11}\\
+		\end{bmatrix}
+	\end{equation}
+	
+	<p>Discrete-time Markov chain is generally used, assuming a constant interval between inspections. The implementation of this model simplifies the mathematical formulation and its calculation to obtain the performance prediction curve. However, this assumption does not correspond to reality in many cases since inspections do not occur at uniform intervals.</p>
+	<p>In the continuous-time Markov chain, the transition between states occurs in a structured way. Assuming the chain is in a particular state \(i\) at time \(t=0\), the time (dwell time) spent in the initial state \(i\) must have a memoryless property according to one of the Markov properties, as discussed before. During a continuous-time process, the time between states has an exponential distribution that depends only on the \(i\) state.</p>
+	<p>The first step to build the Markov model is to estimate the intensity matrix (Q), which can be initially calculated by Equation (\ref{eq:tetha}) using the historical record of the condition states assigned during inspections.</p>
+	\begin{equation}
+		\textbf{Q} = 
+		\begin{bmatrix}
+		-\theta_1 & \theta_1 & 0 & 0 & 0 \\
+		0      & -\theta_2 & \theta_2 & 0 & 0\\
+		0      & 0      & -\theta_3 & \theta_3 & 0\\
+		0      & 0      & 0      & -\theta_4 & \theta_4\\
+		0      & 0      & 0      & 0      & 0\\
+		\end{bmatrix}
+		\; \; ; \; \;
+		\begin{bmatrix}
+		\theta_1 \\
+		\theta_2 \\
+		\theta_3 \\
+		\theta_4 \\
+		\end{bmatrix} 
+		= 
+		\begin{bmatrix}
+		q_{54} \\
+		q_{43} \\
+		q_{32} \\
+		q_{21} \\
+		\end{bmatrix}
+		\; \; ; \; \;
+		q_{ij} = \frac{n_{ij}}{\sum \Delta t_i}
+		\label{eq:tetha}
+	\end{equation}
+	<p>where \(q_{ij}\) represents the transition rate between adjacent states, \(n_{ij}\) is the number of elements that moved from state \(i\) to state \(j\), and \(\sum \Delta t_i\) is the sum of time intervals between observations, whose initial state is \(i\). </p>
+
+	<p>The transition matrix (P) is related to matrix Q through the following differential equation:</p>
+	\begin{equation}
+		\frac{\partial \textbf{P}}{\partial t} = \textbf{P} \textbf{Q}
+	\label{eq:Chapman-Kolmogorov}
+	\end{equation}
+
+	<p>Equation (\ref{eq:Chapman-Kolmogorov}) is known as the Chapman--Kolmogorov equation. Solving Equation (\ref{eq:Chapman-Kolmogorov}), the transition matrix (P) is given by the following expression:</p>
+	\begin{equation}
+		\textbf{P} = e^{\textbf{Q} \Delta t}
+	\end{equation}
+
+	<p>In order to improve the quality of fit, the initial Markov model is improved through an optimization process, by minimizing Equation (\ref{eq:optimization}):</p>
+
+	\begin{equation}
+		log\mbox{-}likelihood = \sum\limits_{n=1}^N \sum\limits_{m=1}^M \ln{(P_{ij})}
+		\label{eq:optimization}
+	\end{equation}
+	<p>where \(M\) is the number of transitions observed in an element, \(N\) is the number of analyzed elements, and \(P_{ij}\) is the probability of occurrence of the observed transition, as predicted by the Markov model.</p>
+    
+	<h2>Bibliography</h2>
+
+</manual>
+{% endblock %}
+	

@@ -77,61 +77,26 @@ function getMaintenanceScenario(){
 }
 
 function sendHash() {
+  document.getElementById('result-warning').innerHTML = '';
   const result_id = document.getElementById("hash").value;
   fetch(`/get_optimization_result?result_id=${result_id}`, {
     method: "GET",
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
-	  createNewChart(data);
+	  if (data.hasOwnProperty('error')) {
+		  throw Error(response.statusText);
+        }
+	  createChart('newChart', data.Performance, data.Cost, 'Performance', 'Cost', `Pareto curve - ${result_id}`);
     })
     .catch((error) => {
-      console.error(error);
+	  changeDivWarning(result_id);
     });
 }
 
-function createNewChart(data) {
-	// Create a Chart.js chart
-	let myChart = Chart.getChart('newChart');
-	if (myChart) {
-		// If the chart already exists, update it with new data
-		myChart.data.labels = data.Year;
-		myChart.data.datasets[0].data = data.IC;
-		myChart.update();
-	} else {
-		// If the chart doesn't exist, create a new one
-		const ctx = document.getElementById('newChart').getContext('2d');
-		const myChart = new Chart(ctx, {
-			type: 'line',
-			data: {
-			  labels: data.Year,
-			  datasets: [{
-				label: 'Markov prediction',
-				data: data.IC,
-				backgroundColor: 'rgba(255, 99, 132, 0.2)',
-				borderColor: 'rgba(255, 99, 132, 1)',
-				borderWidth: 1
-			  }]
-			},
-			options: {
-			  responsive: true,
-			  scales: {
-				x: {
-				  title: {
-					display: true,
-					text: getTimeBlock(),
-				  }
-				},
-				y: {
-				  title: {
-					display: true,
-					text: 'IC',
-				  }
-				},
-			  },
-			  //maintainAspectRatio: false
-			}
-		}
-	)};
-}
+function changeDivWarning(result_id){
+	const warningDiv = document.getElementById('result-warning');
+	warning = "It was not possible to find the result, please check the spelling.<br>";
+	warning = warning + `HASH = <b>${result_id}</b>`
+	warningDiv.innerHTML = warning
+};

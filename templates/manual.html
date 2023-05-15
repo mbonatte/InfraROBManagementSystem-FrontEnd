@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<style>
+	manual a {
+	  background-color: #1;
+	  font-size: 30px;
+	  padding: 20px;
+	  text-align: center;
+	}
+</style>
+<manual>
+	<a href="manual?reference=performance_indicator">Performance indicators</a>
+	<br><br>
+	<a href="manual?reference=deterioration">Deterioration model</a>
+	<br><br>
+	<a href="manual?reference=maintenance">Maintenance model</a>
+	<br><br>
+	<a href="manual?reference=maintenance_optimization">Maintenance optimization</a>
+	<br><br>
+	<a href="manual?reference=network_optimization">Network optimization</a>
+	<br><br>
+	<a href="manual?reference=software">Software</a>
+</manual>
+{% endblock %}
+	

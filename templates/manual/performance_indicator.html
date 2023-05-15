@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<manual>
+	<h1>Performance indicators</h1>
+	
+	<h2>Overview</h2>
+	
+	<p>Performance indicators are numerical measures that are used to evaluate the performance of a system or process. In the context of pavement management systems, performance indicators are used to assess the condition of the road or pavement network, and to monitor changes in the condition over time.</p>
+	<p>There are a wide range of performance indicators that can be used to assess the condition of pavements and roads. Some of the most common performance indicators include roughness, cracking, rutting, and texture depth. These indicators can be measured using a variety of different techniques, including laser profilometry, visual inspection, and other types of equipment.</p>
+	<p>Performance indicators are an important tool for pavement management because they allow decision makers to assess the condition of the road network, and to identify areas that require maintenance or repair. By monitoring changes in performance indicators over time, decision makers can also evaluate the effectiveness of different maintenance strategies, and make adjustments as needed to ensure the long-term health and safety of the road network.</p>
+	<p>In summary, performance indicators are essential tools for pavement management, providing decision makers with the data they need to effectively manage and maintain the road network over time.</p>
+	
+	<h2>Markov</h2>
+	<p>Performance indicators are an essential component of Markov prediction models for pavement management systems, as they provide the data needed to model the evolution of pavement condition over time. By measuring and tracking performance indicators over time, it is possible to develop predictive models that can estimate the future condition of the pavement, identify potential failure modes and maintenance needs, and guide decision-making around maintenance and repair activities.</p>
+	
+	<h2>ASFiNAG</h2>
+	
+	<p>ASFINAG is an Austrian publicly owned corporation responsible for the operation and maintenance of Austria's national highway network. In the context of ASFiNAG, Performance Indicators (PIs) are used to measure and assess the condition and performance of the pavement assets.</p>
+	<p>The reader is encouraged to read the <a href="documents/ASFiNAG" target="_blank">ASFiNAG's manual</a>.</p>
+	<p>This is a document about the systematic maintenance of roads. It defines concepts related to the assessment of the condition of road surfaces, which is necessary to determine the extent of damage and plan for repairs. The document explains that the condition of a road surface is primarily described by the type and extent of damage, which is identified through inspections. A damage means a change in the properties of a part or the entire road structure in the form of deterioration, whether it is visible or not.</p>
+	<p>The document lists five "independent" characteristics of road conditions that are useful and appropriate for practical applications of Austrian PMS (Pavement Management System): 
+	<li>rutting</li>
+	<li>longitudinal evenness</li>
+	<li>skid resistance</li>
+	<li>cracks</li>
+	<li>surface damage</li>
+	<p>These characteristics are used to define the condition of a particular section of road. The measurement and evaluation of these characteristics can differ depending on the type of pavement. </p>
+	<p>The document notes that other data about road conditions may also be collected and stored in the PMS database, but they may not be necessary for PMS analysis. The document also states that the 50m-section is the smallest assessable unit and is the basis for the condition evaluation.</p>
+
+	
+	<h3>Table: Inspections</h3>
+	<table>
+	  <tr>
+		<th>	Section_Name	</th>
+		<th>	Date	</th>
+		<th>	Cracking	</th>
+		<th>	Surface_Defects	</th>
+		<th>	Transverse_Evenness	</th>
+		<th>	Longitudinal_Evenness	</th>
+		<th>	Skid_Resistance	</th>
+		<th>	Skid_Resistance_Tech	</th>
+	  </tr>
+	  <tr>
+		<th>	Road_1_Section_01	</th>
+		<th>	20/01/2018	</th>
+		<th>	0.000149243	</th>
+		<th>	9.93E-17	</th>
+		<th>	1.10E-05	</th>
+		<th>	0.986977185	</th>
+		<th>	0.7516104	</th>
+		<th>	SFC	</th>
+	  </tr>
+	</table>
+	
+	
+	<h3>Table: Road properties</h3>
+	<table>
+	  <tr>
+		<th>	Road_Name	</th>
+		<th>	Section_Name	</th>
+		<th>	Construction_Type	</th>
+		<th>	Street_Category	</th>
+		<th>	Age	</th>
+		<th>	Length	</th>
+		<th>	Width	</th>
+	  </tr>
+	  <tr>
+		<th>	Road_1	</th>
+		<th>	Road_1_Section_01	</th>
+		<th>	AS_N	</th>
+		<th>	Highway	</th>
+		<th>	10	</th>
+		<th>	200	</th>
+		<th>	7	</th>
+	  </tr>
+	</table>
+
+	
+	
+	<h2>COST 354</h2>
+	
+	<p>COST 354 was a European research project focused on developing a common approach to pavement performance measurement and management across Europe. The project aimed to identify key performance indicators for pavement management that could be used to improve the quality, safety, and sustainability of European roads.</p>
+	<p>The project brought together experts from across Europe to develop and test a range of performance indicators for pavement management, including those related to pavement condition, safety, and environmental impact. The ultimate goal of the project was to develop a harmonized approach to pavement performance measurement and management that could be applied across Europe.</p>
+	<p>COST 354 made a significant contribution to the development of pavement performance indicators in Europe and helped to establish a common framework for pavement management. The project's findings have been widely disseminated and continue to inform pavement management practices across Europe and beyond.</p>
+	<p>For more information, the reader is encouraged to check the official website: <a href="http://cost354.zag.si/" target="_blank">http://cost354.zag.si/</a></p>
+	
+	</manual>
+{% endblock %}
+	

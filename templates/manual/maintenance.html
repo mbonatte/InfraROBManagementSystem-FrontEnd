@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<script>
+window.MathJax = {
+  tex: {
+    tags: 'ams'
+  }
+};
+</script>
+<manual>
+	<h1>Maintenancel model</h1>
+	
+	<h2>Overview</h2>
+	<p>The  present  PMS  models  the  effects  of   maintenance   actions   considering   the  data  provided.   Maintenance   actions  can  be  either  programmed  or  applied if the performance of the asset is  inadequate.  The  former  is  usually  referred   as   preventive,   whereas   the   latter  is  denoted  as  corrective.  When  the action is applied, its impact on the asset performance can be modelled by the following effects:</p>
+	<li>(a) improvement in performance at the time of application;</li>
+	<li>(b)  delay  and/or  reduction  in  deterioration  rate  for  a  period  of  time  after  application.</li>
+	<p>Thus,  when  a  maintenance  action  having  the  effect  of improving a performance is applied, the  asset  condition  state  is  update  by  reducing  its  condition  state  by  a  value  of \(\gamma\).  In  the  case  of  delaying  the  deterioration  process,  the  condition  state  remains  constant  during  the  period  \(t_d\). In  this  situation,  the  transition  matrix  can  be  viewed  as  an  identity  matrix.  On the other hand, if the maintenance action reduces deterioration during the period \(t_r\), this effect can be modelled by multiplying  the  elements  of  the  intensity matrix by a reduction rate \(\delta_r\).</p>
+	
+	<img src="{{ url_for('static', filename='maintenance.png') }}"/>
+	
+	<p>In practice, the effects of maintenance actions are not deterministic. They are influenced  by  uncertainties  due  to  a  wide  range  of  factors.  Therefore,  random variables are used to model these parameters.   A   general   maintenance   action  can  be  thus  defined  by  a  set  of  parameters:
+	<li>(a) \(id\)  is  the  identification  number  of  maintenance  action;  
+	<li>(b) \(t_d\)  is  the  time  of  delay;  
+	<li>(c)  \(\gamma\)  is  the  improvement  in  condition  state;  
+	<li>(d)  \(t_r\) is  the  time  of  reduction  in  deterioration;
+	<li>(e)  \(d_r\)  is  the  rate  of  reduction  in  deterioration.
+	<p>Since  the  effects  produced  on  an  asset  depend  on  its  current   condition   state,   the   parameters  are  represented  as  vectors,  with  components    describing    the    effects    regarding the corresponding state. For instance,  for  the  asset  having  the  condition state 1 the effects are modelled by  {\({t_{d1}, \gamma_1, t_{r1}, t_{d1}}\)},  for  the  asset  having  the  condition  state  2  the  effects  are  modelled  by  {\({t_{d2}, \gamma_{2}, t_{r2}, t_{d2}}\)}  and  so  on.  In  this  PMS,  it  is  assumed  that  these  random  variables  follow  a  triangular  distribution.   Triangular   distributions   are  the  simplest  way  of  introducing  randomness  with  a  mode  (the  most  probable value) and a minimum value and a maximum value.</p>
+	
+	<img src="https://i.stack.imgur.com/w9F9r.png"/>
+	
+	<h2>Monte Carlo simulation</h2>
+	<p>The  Monte  Carlo  method  consists  in  sampling   from   a   probability   distribution,  related  to  the  system  being  modelled,  to  simulate  its  underlying  process. In the context of the degradation  of  highway  assets,  the  transition  probabilities  defined  by  the  Markov  process  are  used  to  estimate  a  future  performance  that  gives  a  single  sample.  This  is  repeated  to  get  a  number  of samples defining a family of degradation curves. To obtain a reliable estimate,  the  samples  are  averaged  over  the corresponding periods of time.</p>
+	<p>The  inputs  for  the  simulation  process  are: </p>
+	<li>(a) the intensity matrix calculated on the basis of the historical record of inspections; </li>
+	<li>(b)  the  current  condition  state;
+	<li>(c)  the  timetable  of  maintenance actions.</li>
+	<p>Each sample is stored in the  sampling  matrix ,  where  \(n_s\)  is  the  number  of  samples  and  \(t_h\)  is  the  time  horizon.   The   entry   of   the   sampling   matrix  is  of  the  form  \(S_{ij}  =  \{c, t_d, t_r, \delta_r\}\), where \(c\)  is  the  condition  state  of  the  ith sample in the jth year, \(t_d\), \(t_r\), \(\delta_r\) are the values of parameters modelling the action effects that are drawn from a triangular distribution for state \(c\).</p>
+	<p>Sampling  of  \(S_{ij+1}\)  is  performed  on  the  basis of \(c\) in \(S_{ij}\) and maintenance effects preceding the (j + 1)-th entry in the i-th row  of  \(S\).  First,  the  lowest  value  of  \(\delta_r\) is found such that its time of reduction encompasses  the  j-th  year.  It  is  worth  noting  that  the  case  with  \(\delta_r =  0\)  corresponds  to  delaying  the  deterioration  process. Once \(\delta_r\) is found, the transition matrix is calculated through Eq. (\ref{eq:trasition_delta}):</p>
+	\begin{equation}
+		\textbf{P} = e^{\textbf{Q} \Delta t \delta_r}
+	\label{eq:trasition_delta}
+	\end{equation}
+	<p>Then,  the  condition  state  \(c′\)  in  \(S_{ij+1}\)  is  computed based on the state \(c\) in \(S_{ij}\). To do this, the vector of cumulative distributions \(A\) is used, which  is  obtained  from \(P\) as shown in expression (\ref{eq:comulative_distribution}):</p>
+	\begin{equation}
+		A = [\sum_{i=1}^{1}{p_i}, \sum_{i=1}^{2}{p_i},...,\sum_{i=1}^{n_c}{p_i}]
+	\label{eq:comulative_distribution}
+	\end{equation}
+	<p>where \(ps\)  are  the  elements  of  \(P\)  corresponding  to  the  state  \(c\)  (e.g.  for  \(c  =  1\)  the  first  row  of  \(P\)  is  used,  for  \(c  =  2\)  the second row of \(P\) is used and so on). Finally, a random number \(u ~ U(0, 1)\) is generated and the next condition state is determined as given in Eq. (\ref{eq:random_number})</p>
+	\begin{equation}
+		c' = 
+		\begin{bmatrix}
+			1 & if u < A_1 \\
+			2 & if A_1 \le u \le A_2 \\
+			...\\
+			c_{max} & otherwise \\
+		\end{bmatrix}
+	\label{eq:random_number}
+	\end{equation}
+	<p>It  is  worth  noting  that  the  successive  condition  state  \(c′\)  is  always  greater  or  equal to the current state, \(c\). Averaging the  columns  of  the  sampling  matrix  \(S\) gives the estimation of the future mean asset performance.</p>
+	
+	<h2>Example</h2>
+	<p>As  an  example,  the fig. below  illustrates  the  asset performance during the 80 years estimated by the Monte Carlo method, given  the  initial  state  2  and  the  intensity  matrix  with  \(σ  =  (0.0753,  0.0997,  0.1481, 0.1682)^T\). Without maintenance, the   asset   performance   deteriorates   naturally  as  shown  in  the left.  On  the  other  hand,  in the right  depicts  the  case  with maintenance activities. The maintenance  effect  resulting  in  improving  the condition state can be observed in the 20-th year, when the condition state is improved from the value of >4 to 2. For  the  following  15  years,  the  condition  state  remains  unchanged,  corresponding to the effect of  maintenance action  resulting  in  delaying  the  degradation  process.  Then,  the  condition  state deteriorates with 30% of the natural  degradation  rate,  corresponding  to  the  maintenance  effect  of  reducing  the degradation rate.</p>
+	
+	<img src="{{ url_for('static', filename='maintenance_example.png') }}"/>
+	
+	<h2>Reference</h2>
+	<p>Denysiuk, R., Fernandes, J., Matos, J. C., Neves, L. C., &#38; Berardinelli, U. (2016). A computational framework for infrastructure asset maintenance scheduling. <i>Structural Engineering International</i>, <i>26</i>(2), 94–102. https://doi.org/10.2749/101686616X14555428759046</p>
+</manual>
+{% endblock %}
+	
