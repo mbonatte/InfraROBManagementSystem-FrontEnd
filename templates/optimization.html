@@ -8,5 +8,20 @@
 	</div>
 	<input type="file" id="maintenanceFile" accept=".json">
 	<hr>
-<script src="{{url_for('static', filename='optimization.js')}}"></script>
+{% endblock %}
+
+
+{% block extra_block %}
+	<hr>
+	<h2> Load result </h2>
+	<form>
+	  <label for="hash">Enter the hash:</label>
+	  <input type="text" id="hash" name="hash">
+	  <button type="button" onclick="sendHash()">Submit</button>
+	</form>
+	<div id="chart-wrapper" height="100px" width="100px">
+		<canvas id="newChart"></canvas>
+	</div>
+	
+	<script src="{{url_for('static', filename='optimization.js')}}"></script>
 {% endblock %}

@@ -1,7 +1,6 @@
 const maintenanceFile = document.getElementById('maintenanceFile');
 let maintenanceActions = ''
 
-
 maintenanceFile.addEventListener('change', (event) => {
   const file = event.target.files[0];
   const reader = new FileReader();
@@ -75,4 +74,64 @@ function getMaintenanceScenario(){
 		}
 	}
 	return scenario
+}
+
+function sendHash() {
+  const result_id = document.getElementById("hash").value;
+  fetch(`/get_optimization_result?result_id=${result_id}`, {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+	  createNewChart(data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+function createNewChart(data) {
+	// Create a Chart.js chart
+	let myChart = Chart.getChart('newChart');
+	if (myChart) {
+		// If the chart already exists, update it with new data
+		myChart.data.labels = data.Year;
+		myChart.data.datasets[0].data = data.IC;
+		myChart.update();
+	} else {
+		// If the chart doesn't exist, create a new one
+		const ctx = document.getElementById('newChart').getContext('2d');
+		const myChart = new Chart(ctx, {
+			type: 'line',
+			data: {
+			  labels: data.Year,
+			  datasets: [{
+				label: 'Markov prediction',
+				data: data.IC,
+				backgroundColor: 'rgba(255, 99, 132, 0.2)',
+				borderColor: 'rgba(255, 99, 132, 1)',
+				borderWidth: 1
+			  }]
+			},
+			options: {
+			  responsive: true,
+			  scales: {
+				x: {
+				  title: {
+					display: true,
+					text: getTimeBlock(),
+				  }
+				},
+				y: {
+				  title: {
+					display: true,
+					text: 'IC',
+				  }
+				},
+			  },
+			  //maintainAspectRatio: false
+			}
+		}
+	)};
 }

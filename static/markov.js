@@ -67,6 +67,9 @@ runBtn.addEventListener('click', () => {
 	if (window.location.pathname === '/optimization'){
 		const maintenanceFile = document.getElementById('maintenanceFile');
 		formData.append('maintenanceFile', maintenanceFile.files[0]);
+		const result_id = this.crypto.randomUUID().slice(0, 8)
+		changeDivResponse(result_id)
+		formData.append('result_id', JSON.stringify(result_id));
 	}
 
 	fetch(window.location.pathname, {
@@ -76,13 +79,19 @@ runBtn.addEventListener('click', () => {
 	.then(response => response.json())
 	.then(data => {
 	// Display the JSON response in the result div
-	//responseDiv.innerHTML = JSON.stringify(data);
 	console.log(JSON.stringify(data))
 	createChart(data);
 	})
 	.catch(error => console.error(error));
 });
 
+
+function changeDivResponse(result_id){
+	warning = "This request my take several minutes.<br> ";
+	warning = warning + "In case you do not want to wait, please use the following hash to access the result when it's done.<br>";
+	warning = warning + `HASH = <b>${result_id}</b>`
+	responseDiv.innerHTML = warning
+};
 
 function createChart(data) {
 	// Create a Chart.js chart

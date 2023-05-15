@@ -12,7 +12,7 @@
 	  <option value="COST_354">COST 354</option>
 	</select>
 	<div id="worst-best-IC-div" style="display:none;">
-	  <li><a href="/inspections/genericdatabase" download>Download an example of a genric database</a></li>
+	  <li><a href="/database/genericdatabase" download>Download an example of a genric database</a></li>
 	  <p> The example has the worst and best CI values equal to 0 and 4, respectively.
 	  <h3>Select the worst and best IC:</h3>
 	  <select id="worst-IC">
@@ -45,11 +45,11 @@
 	  </select>
 	</div>
 	<div id="asfinag-download-div" style="display:none;">
-	  <li><a href="/inspections/asfinagdatabase" download>Download an example of a ASFiNAG database</a></li>
+	  <li><a href="/database/asfinagdatabase" download>Download an example of a ASFiNAG database</a></li>
 	</div>
 	<hr>
 	<h2> Import inpections </h2>
-    <input type="file" id="inspectionsFile" accept=".csv, .json">
+    <input type="file" id="inspectionsFile" accept=".csv">
 	<hr>
 	<h2> Time block </h2>
 	  <select id="time-block">
@@ -78,6 +78,7 @@
 	<div id="chart-wrapper" height="100px" width="100px">
 		<canvas id="myChart"></canvas>
 	</div>
+	{% block extra_block %} {% endblock %}
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{url_for('static', filename='markov.js')}}"></script>
 {% endblock %}
