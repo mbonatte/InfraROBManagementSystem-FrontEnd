@@ -1,30 +1,29 @@
 const runBtn = document.getElementById('runBtn');
 const inspectionsFile = document.getElementById('inspectionsFile');
+const propertiesFile = document.getElementById('propertiesFile');
 const responseDiv = document.getElementById('response');
-const institution = document.getElementById('institution');
-
-function getInstitution(){
-	return institution.value
-}
-
-function getTimeBlock(){
-	return document.getElementById('time-block').value
-}
-
-function getTimeHorizon(){
-	return parseInt(document.getElementById('time-horizon').value)
-}
+let markovResponse = ''
 
 institution.addEventListener('change', function() {
 	const worst_best_IC_div = document.getElementById('worst-best-IC-div');
+	const importContent = document.getElementById('importContent');
+	const divProperties = document.getElementById('divProperties');
+	
+	importContent.innerHTML = "Import inpections";
 	worst_best_IC_div.style.display = 'none';
+	divProperties.style.display = 'none';
+	
 	if (this.value === 'Generic') {
 		worst_best_IC_div.style.display = 'block';
+	}
+	else {
+		importContent.innerHTML = "Import inpections and properties";
+		divProperties.style.display = 'block';
 	}
 });
 
 function getWorstBestIC(){
-	const institution = getInstitution();
+	const institution = document.getElementById('institution').value;
 	if (institution === 'ASFiNAG') {
 		return {worst_IC: 5,
 				best_IC: 1
@@ -48,10 +47,17 @@ function getWorstBestIC(){
 runBtn.addEventListener('click', () => {
 	const result_id = Math.random().toString(36).substr(2, 8);
 	const formData = new FormData();
+	const institution = document.getElementById('institution').value;
+	const time_block = document.getElementById('time-block').value
+	const time_horizon = parseInt(document.getElementById('time-horizon').value)
 	formData.append('inspectionsFile', inspectionsFile.files[0]);
+	if (institution === 'ASFiNAG'){
+		formData.append('propertiesFile', propertiesFile.files[0]);
+	}
+	formData.append('institution', JSON.stringify(institution));
 	formData.append('worst_best_IC', JSON.stringify(getWorstBestIC()));
-	formData.append('time_block', JSON.stringify(getTimeBlock()));
-	formData.append('time_horizon', JSON.stringify(getTimeHorizon()));
+	formData.append('time_block', JSON.stringify(time_block));
+	formData.append('time_horizon', JSON.stringify(time_horizon));
 	
 	if (window.location.pathname === '/maintenance'){
 		const maintenanceFile = document.getElementById('maintenanceFile');
@@ -74,8 +80,14 @@ runBtn.addEventListener('click', () => {
 	.then(data => {
 	// Display the JSON response in the result div
 	console.log(JSON.stringify(data))
+	markovResponse = data
 	if (window.location.pathname !== '/optimization'){
-		createChart('myChart', data.Year, data.IC, getTimeBlock(), 'IC', 'Markov prediction');
+		if (institution !== 'ASFiNAG'){
+			createChart('myChart', data.Year, data.IC, time_block, 'IC', 'Markov prediction');
+		}
+		else {
+			addSelectFields(data);
+		}
 	}
 	else {
 		createChart('myChart', data.Performance, data.Cost, 'Performance', 'Cost', `Pareto curve - ${result_id}`);
@@ -136,3 +148,34 @@ function createChart(canvas_name, data_x, data_y, x_label, y_label, data_title) 
 		}
 	)};
 }
+
+
+
+function addSelectFields(content) {
+	const response = document.getElementById("response");
+	
+	uniqueNames = Object.keys(content);
+	const indicator = document.createElement("select");
+	indicator.name = "indicator";
+	indicator.id = "indicator";
+	
+	const option_ = document.createElement("option");
+	option_.value = 'Select indicator';
+	option_.text = 'Select indicator';
+	
+	indicator.add(option_);
+	for (let i = 0; i < uniqueNames.length; i++) {
+		const option1 = document.createElement("option");
+		option1.value = uniqueNames[i];
+		option1.text = uniqueNames[i];
+		indicator.add(option1);
+		response.appendChild(indicator);
+	}
+}
+
+responseDiv.addEventListener('change', () => {
+	const indicator = document.getElementById("indicator").value;
+	console.log(markovResponse[indicator].Time)
+	console.log(markovResponse[indicator].IC)
+	createChart('myChart', markovResponse[indicator].Time, markovResponse[indicator].IC, 'Year', 'IC', indicator);
+});
