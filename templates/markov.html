@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 
+{% block title %}
+	Markov
+{% endblock %}
+
 
 {% block content %}
 	<p> Predict the deteroration of the asset based on the Markov method. </p>
 	<hr>
-	<h2> Choose institution </h2>
+	<h1> Choose institution </h1>
 	<select id="institution">
 	  <option value="">-- Select an institution --</option>
 	  <option value="Generic">Generic</option>
@@ -12,8 +16,6 @@
 	  <option value="COST_354">COST 354</option>
 	</select>
 	<div id="worst-best-IC-div" style="display:none;">
-	  <li><a href="/database/genericdatabase" download>Download an example of a genric database</a></li>
-	  <p> The example has the worst and best CI values equal to 0 and 4, respectively.
 	  <h3>Select the worst and best IC:</h3>
 	  <select id="worst-IC">
 		<option value="">Select the worst IC:</option>
@@ -44,21 +46,18 @@
 		<option value="9">9</option>
 	  </select>
 	</div>
-	<div id="asfinag-download-div" style="display:none;">
-	  <li><a href="/database/asfinagdatabase" download>Download an example of a ASFiNAG database</a></li>
-	</div>
-	<hr>
-	<h2> Import inpections </h2>
+
+	<h1> Import inpections </h1>
     <input type="file" id="inspectionsFile" accept=".csv">
-	<hr>
-	<h2> Time block </h2>
+
+	<h1> Time block </h1>
 	  <select id="time-block">
 		<option value="">Select the time block:</option>
 		<option value="month">Month</option>
 		<option value="year">Year</option>
 	  </select>
-	<hr>
-	<h2> Time horizon </h2>
+
+	<h1> Time horizon </h1>
 	  <select id="time-horizon">
 		<option value="">Select the time horizon:</option>
 		<option value="5">5</option>
@@ -67,11 +66,11 @@
 		<option value="50">50</option>
 		<option value="100">100</option>
 	  </select>
-	<hr>
+
 	<div class="maintenance_block">
         {% block maintenance_block %} {% endblock %}
     </div>
-	<h2> Run analysis </h2>
+	<h1> Run analysis </h1>
 	  
     <button id="runBtn">Run</button>
     <div id="response"></div>

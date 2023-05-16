@@ -17,15 +17,9 @@ function getTimeHorizon(){
 
 institution.addEventListener('change', function() {
 	const worst_best_IC_div = document.getElementById('worst-best-IC-div');
-	const asfinag_download_div = document.getElementById('asfinag-download-div');
-	
 	worst_best_IC_div.style.display = 'none';
-	asfinag_download_div.style.display = 'none';
 	if (this.value === 'Generic') {
 		worst_best_IC_div.style.display = 'block';
-	}
-	else if (this.value === 'ASFiNAG') {
-		asfinag_download_div.style.display = 'block';		
 	}
 });
 

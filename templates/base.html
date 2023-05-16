@@ -27,13 +27,11 @@
       <img src="{{ url_for('static', filename='logo_infrarob.png') }}" alt="logo_infrarob" />
 	  <img src="{{ url_for('static', filename='logo_uminho.png') }}" alt="logo_uminho" />
 	</div>
-    <h1>Pavement Management System (PMS)</h1>
-	<div>
-      <a href="https://infrarobproject.com/" target="_blank"> InfraROB Official website </a>
-	</div>
-	<hr>
+	<h1>{% block title %}Pavement Management System (PMS){% endblock %}</h1>
 	<div class="content">
-        {% block content %} {% endblock %}
+		<content>
+			{% block content %} {% endblock %}
+		</content>
     </div>
 	<footer>
 	  <div class="footer-content">
