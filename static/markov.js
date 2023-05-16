@@ -52,6 +52,7 @@ function getWorstBestIC(){
 
 
 runBtn.addEventListener('click', () => {
+	const result_id = Math.random().toString(36).substr(2, 8);
 	const formData = new FormData();
 	formData.append('inspectionsFile', inspectionsFile.files[0]);
 	formData.append('worst_best_IC', JSON.stringify(getWorstBestIC()));
@@ -67,7 +68,6 @@ runBtn.addEventListener('click', () => {
 	if (window.location.pathname === '/optimization'){
 		const maintenanceFile = document.getElementById('maintenanceFile');
 		formData.append('maintenanceFile', maintenanceFile.files[0]);
-		const result_id = this.crypto.randomUUID().slice(0, 8)
 		changeDivResponse(result_id)
 		formData.append('result_id', JSON.stringify(result_id));
 	}

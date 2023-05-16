@@ -5,19 +5,24 @@
 	<h1> Choose institution </h1>
 	<select id="institution">
 	  <option value="">-- Select an institution --</option>
-	  <option value="Generic">Generic</option>
 	  <option value="ASFiNAG">ASFiNAG</option>
 	  <option value="COST_354">COST 354</option>
 	</select>
-	<h1> Import inpections </h1>
-    <input type="file" id="inspectionsFile" accept=".csv, .json">
-	<h1> Run analysis </h1>
-	<div id='assets'> </div>
+	<h1> Import inpections and properties </h1>
+	 <b>Inspections:</b>
+    <input type="file" id="inspectionsFile" accept=".csv">
+	 <b>Properties:</b>
+	<input type="file" id="propertiesFile" accept=".csv">
+	<h1> Convert </h1>
+	<button id="runBtn">Convert</button>
+	<h1> Plot </h1>
+    <div id='assets'> </div>
+    <div id="response"></div>
 	<div id="chart-wrapper" height="100px" width="100px">
 		<canvas id="myChart"></canvas>
 	</div>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{url_for('static', filename='inspections.js')}}"></script>
+    <script src="{{url_for('static', filename='convert.js')}}"></script>
 {% endblock %}
 	
