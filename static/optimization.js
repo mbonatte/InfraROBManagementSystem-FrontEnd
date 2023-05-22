@@ -1,82 +1,7 @@
-const maintenanceFile = document.getElementById('maintenanceFile');
-let maintenanceActions = ''
+const resultSelection = document.getElementById('result-selection');
+let results = ''
 
-maintenanceFile.addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  const reader = new FileReader();
-  reader.readAsText(file);
-  reader.onload = () => {
-    const content = JSON.parse(reader.result);
-    maintenanceActions = content;
-  };
-});
-
-
-
-function addSelectFields() {
-  const numMaintenance = document.getElementById("number-maintenance").value;
-  const maintenance_scenarios = document.getElementById("maintenance-scenarios");
-  const time_horizon = parseInt(document.getElementById('time-horizon').value);
-  
-  maintenance_scenarios.innerHTML = ""; // Clear any previously added fields
-  
-  for (let i = 0; i < numMaintenance; i++) {
-	const scenario = document.createElement("div");
-    scenario.name = "scenario-maintenance-" + (i+1);
-    scenario.id = "scenario-maintenance-" + (i+1);
-	  
-    const maintenance_action = document.createElement("select");
-    maintenance_action.name = "maintenance-action-" + (i+1);
-    maintenance_action.id = "maintenance-action-" + (i+1);
-	
-	const time_maintenance = document.createElement("select");
-    time_maintenance.name = "time-maintenance-" + (i+1);
-    time_maintenance.id = "time-maintenance-" + (i+1);
-	
-    const option1 = document.createElement("option");
-    option1.value = "";
-    option1.text = "Select time:";
-	time_maintenance.add(option1);
-	
-	const option3 = document.createElement("option");
-    option3.value = "";
-    option3.text = "Select action:";
-	maintenance_action.add(option3);
-	
-	for (let j = 0; j < time_horizon; j++) {
-		const option_ = document.createElement("option");
-		option_.value = (j+1);
-		option_.text = (j+1);
-		time_maintenance.add(option_);
-	}
-	
-	for (let j = 0; j < maintenanceActions.length; j++) {
-		const option_ = document.createElement("option");
-		option_.value = maintenanceActions[j].name;
-		option_.text = maintenanceActions[j].name;
-		maintenance_action.add(option_);
-	}
-	
-	scenario.appendChild(time_maintenance);
-	scenario.appendChild(maintenance_action);
-    maintenance_scenarios.appendChild(scenario);
-  }
-}
-
-function getMaintenanceScenario(){
-	const numMaintenance = document.getElementById("number-maintenance").value;
-	var scenario = {}
-	for (let i = 0; i < numMaintenance; i++) {
-		const time = document.getElementById("time-maintenance-" + (i+1)).value;
-		const action = document.getElementById("maintenance-action-" + (i+1)).value;
-		if (time !== '' && action !== ''){
-			scenario[time] = action;
-		}
-	}
-	return scenario
-}
-
-function sendHash() {
+function plotGraphByHash() {
   document.getElementById('result-warning').innerHTML = '';
   const result_id = document.getElementById("hash").value;
   fetch(`/get_optimization_result?result_id=${result_id}`, {
@@ -87,9 +12,12 @@ function sendHash() {
 	  if (data.hasOwnProperty('error')) {
 		  throw Error(response.statusText);
         }
+	  results = data
 	  createChart('newChart', data.Performance, data.Cost, 'Performance', 'Cost', `Pareto curve - ${result_id}`);
+	  addResultFields(data);
     })
     .catch((error) => {
+		console.log(error)
 	  changeDivWarning(result_id);
     });
 }
@@ -99,4 +27,83 @@ function changeDivWarning(result_id){
 	warning = "It was not possible to find the result, please check the spelling.<br>";
 	warning = warning + `HASH = <b>${result_id}</b>`
 	warningDiv.innerHTML = warning
+};
+
+function addResultFields(content) {
+	const results = document.getElementById("result-selection");
+	results.innerHTML = ""
+	
+	const result = document.createElement("select");
+	result.name = "result";
+	result.id = "result";
+	
+	const option_ = document.createElement("option");
+	option_.value = 'Select result';
+	option_.text = 'Select result';
+	result.add(option_);
+	
+	for (let i = 0; i < content.Performance.length; i++) {
+		const option1 = document.createElement("option");
+		option1.value = i;
+		option1.text = `Result ${i+1}`;
+		result.add(option1);
+		results.appendChild(result);
+	}
+}
+
+resultSelection.addEventListener('change', () => {
+	const result = document.getElementById("result")
+	if (result.value !== 'Select result'){
+		addNewPointGraph(result);
+		changeActionsText(result);
+		addNewGraph(result);
+		
+	};
+});
+
+function addNewPointGraph(result){
+	new_chart = Chart.getChart(newChart);
+	
+	// Get the chart data
+	const chartData = new_chart.data;
+	
+	// Add a new dataset
+		const selectedResult = {
+		  type: 'scatter',
+		  label: result.options[result.selectedIndex].text,
+		  data: [{	x: results.Performance[result.value],
+					y: results.Cost[result.value]
+				}],
+		  backgroundColor: 'rgba(0, 0, 0, 1)',
+		  borderColor: 'rgba(0, 0, 0, 1)',
+		  borderWidth: 4
+		};
+	
+	if (chartData.datasets.length < 2){
+		// Add the new dataset to the datasets array
+		chartData.datasets.push(selectedResult);
+	}
+	else {
+		// Remove the last dataset to the datasets array
+		chartData.datasets.pop();
+		// Add the new dataset to the datasets array
+		chartData.datasets.push(selectedResult);
+	}
+	// Update the chart
+		new_chart.update();
+};
+
+function changeActionsText(result){
+	const actions_text = document.getElementById("actions-text");
+	actions_text.innerHTML = `Actions = ${JSON.stringify(results.Actions_schedule[result.value])}`;
+	
+}
+
+
+function addNewGraph(resut) {
+	
+	x = results.Markov[result.value].Time
+	y = results.Markov[result.value].IC
+	
+	createChart('performanceChart', x, y, 'Time', 'IC', result.options[result.selectedIndex].text);
 };

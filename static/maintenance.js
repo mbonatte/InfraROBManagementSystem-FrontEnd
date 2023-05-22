@@ -14,7 +14,7 @@ maintenanceFile.addEventListener('change', (event) => {
 
 
 
-function addSelectFields() {
+function addActionFields() {
   const numMaintenance = document.getElementById("number-maintenance").value;
   const maintenance_scenarios = document.getElementById("maintenance-scenarios");
   const time_horizon = parseInt(document.getElementById('time-horizon').value);

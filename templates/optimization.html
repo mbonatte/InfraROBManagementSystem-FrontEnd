@@ -17,11 +17,16 @@
 	<form>
 	  <label for="hash">Enter the hash:</label>
 	  <input type="text" id="hash" name="hash">
-	  <button type="button" onclick="sendHash()">Submit</button>
+	  <button type="button" onclick="plotGraphByHash()">Submit</button>
 	</form>
 	<div id="result-warning"> </div>
 	<div id="chart-wrapper" height="100px" width="100px">
 		<canvas id="newChart"></canvas>
+	</div>
+	<div id="result-selection"> </div>
+	<p id='actions-text'> </p>
+	<div id="chart-wrapper" height="100px" width="100px">
+		<canvas id="performanceChart"></canvas>
 	</div>
 	
 	<script src="{{url_for('static', filename='optimization.js')}}"></script>

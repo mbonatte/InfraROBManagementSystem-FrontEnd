@@ -79,7 +79,6 @@ runBtn.addEventListener('click', () => {
 	.then(response => response.json())
 	.then(data => {
 	// Display the JSON response in the result div
-	console.log(JSON.stringify(data))
 	markovResponse = data
 	if (window.location.pathname !== '/optimization'){
 		if (institution !== 'ASFiNAG'){
@@ -111,6 +110,8 @@ function createChart(canvas_name, data_x, data_y, x_label, y_label, data_title) 
 		// If the chart already exists, update it with new data
 		myChart.data.labels = data_x;
 		myChart.data.datasets[0].data = data_y;
+		myChart.data.datasets[0].label = data_title;
+		myChart.options.scales.y.title.text = y_label;
 		myChart.update();
 	} else {
 		// If the chart doesn't exist, create a new one
@@ -149,10 +150,10 @@ function createChart(canvas_name, data_x, data_y, x_label, y_label, data_title) 
 	)};
 }
 
-
-
 function addSelectFields(content) {
 	const response = document.getElementById("response");
+	response.innerHTML = "";
+	
 	
 	uniqueNames = Object.keys(content);
 	const indicator = document.createElement("select");
@@ -175,7 +176,5 @@ function addSelectFields(content) {
 
 responseDiv.addEventListener('change', () => {
 	const indicator = document.getElementById("indicator").value;
-	console.log(markovResponse[indicator].Time)
-	console.log(markovResponse[indicator].IC)
 	createChart('myChart', markovResponse[indicator].Time, markovResponse[indicator].IC, 'Year', 'IC', indicator);
 });
