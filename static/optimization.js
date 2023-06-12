@@ -14,6 +14,7 @@ function plotGraphByHash() {
         }
 	  results = data
 	  createChart('newChart', data.Performance, data.Cost, 'Area under curve', 'Cost', `Pareto curve - ${result_id}`);
+	  plotDummies(data.Dummies)
 	  addResultFields(data);
     })
     .catch((error) => {
@@ -61,6 +62,34 @@ resultSelection.addEventListener('change', () => {
 	};
 });
 
+
+function plotDummies(dummies){
+	new_chart = Chart.getChart(newChart);
+	
+	// Get the chart data
+	const chartData = new_chart.data;
+	
+	// Convert to data array
+    var data = [];
+    for (var i = 0; i < dummies.Performance.length; i++) {
+      data.push({ x: dummies.Performance[i], y: dummies.Cost[i] });
+    }
+	console.log(data)
+	// Add a new dataset
+		const result = {
+		  type: 'scatter',
+		  label: 'Dummies',
+		  data: data,
+		  backgroundColor: 'rgba(220,220,220, 0.5)',
+		  borderColor: 'rgba(220,220,220, 0.5)',
+		  borderWidth: 3
+		};
+	
+	chartData.datasets.push(result);
+	// Update the chart
+	new_chart.update();
+};
+
 function addNewPointGraph(result){
 	new_chart = Chart.getChart(newChart);
 	
@@ -79,7 +108,7 @@ function addNewPointGraph(result){
 		  borderWidth: 4
 		};
 	
-	if (chartData.datasets.length < 2){
+	if (chartData.datasets.length < 3){
 		// Add the new dataset to the datasets array
 		chartData.datasets.push(selectedResult);
 	}

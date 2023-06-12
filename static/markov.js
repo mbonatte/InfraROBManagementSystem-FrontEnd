@@ -132,12 +132,14 @@ function createChart(canvas_name, data_x, data_y, x_label, y_label, data_title) 
 			  responsive: true,
 			  scales: {
 				x: {
+				  type: 'linear',	
 				  title: {
 					display: true,
 					text: x_label,
 				  }
 				},
 				y: {
+				  type: 'linear',
 				  title: {
 					display: true,
 					text: y_label,
@@ -153,7 +155,6 @@ function createChart(canvas_name, data_x, data_y, x_label, y_label, data_title) 
 function addSelectFields(content) {
 	const response = document.getElementById("response");
 	response.innerHTML = "";
-	
 	
 	uniqueNames = Object.keys(content);
 	const indicator = document.createElement("select");
