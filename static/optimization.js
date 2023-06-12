@@ -13,7 +13,7 @@ function plotGraphByHash() {
 		  throw Error(response.statusText);
         }
 	  results = data
-	  createChart('newChart', data.Performance, data.Cost, 'Performance', 'Cost', `Pareto curve - ${result_id}`);
+	  createChart('newChart', data.Performance, data.Cost, 'Area under curve', 'Cost', `Pareto curve - ${result_id}`);
 	  addResultFields(data);
     })
     .catch((error) => {
