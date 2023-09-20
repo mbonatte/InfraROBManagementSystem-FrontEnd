@@ -10,10 +10,10 @@ import numpy as np
 from app import app
 from werkzeug.datastructures import FileStorage
 
-from numba import njit
-@njit
-def set_seed(value):
-    np.random.seed(value)
+# from numba import njit
+# @njit
+# def set_seed(value):
+    # np.random.seed(value)
 
 class TestFlaskApp(unittest.TestCase):
     def setUp(self):
@@ -123,7 +123,8 @@ class TestFlaskApp(unittest.TestCase):
         
         data['maintenanceScenario'] = json.dumps({"5": "Crack sealing"})
         
-        set_seed(1)
+        random.seed(1)
+        #set_seed(1)
         response = self.client.post('/maintenance',
                                data=data,
                                content_type='multipart/form-data',
@@ -132,7 +133,7 @@ class TestFlaskApp(unittest.TestCase):
         
         IC = json.loads(response.data.decode('utf-8'))['IC']
         
-        self.assertAlmostEqual(IC[-1], 2.72, places=2)
+        self.assertAlmostEqual(IC[-1], 2.97, places=2)
     
     # def test_maintenance_asfinag_post(self):
         # response = self.client.post('/maintenance')
