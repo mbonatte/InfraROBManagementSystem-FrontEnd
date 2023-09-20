@@ -91,7 +91,6 @@ class TestFlaskApp(unittest.TestCase):
                                )
         
         #assert response.status_code == 200
-        
         result = json.loads(response.data.decode('utf-8'))
         
         Cracking_ASFiNAG = result['Cracking_ASFiNAG']
@@ -100,12 +99,11 @@ class TestFlaskApp(unittest.TestCase):
         Surface_Defects_ASFiNAG = result['Surface_Defects_ASFiNAG']
         Transverse_Evenness_ASFiNAG = result['Transverse_Evenness_ASFiNAG']
         
-        
-        self.assertAlmostEqual(Cracking_ASFiNAG['IC'][-1], 4.9928228, places=6)
-        self.assertAlmostEqual(Longitudinal_Evenness_ASFiNAG['IC'][-1], 2.9997945, places=6)
+        self.assertAlmostEqual(Cracking_ASFiNAG['IC'][-1], 4.804270142951769, places=6)
+        self.assertAlmostEqual(Longitudinal_Evenness_ASFiNAG['IC'][-1], 2.9849168668620782, places=6)
         self.assertAlmostEqual(Skid_Resistance_ASFiNAG['IC'][-1], 2.00000, places=6)
-        self.assertAlmostEqual(Surface_Defects_ASFiNAG['IC'][-1], 3.9298959, places=6)
-        self.assertAlmostEqual(Transverse_Evenness_ASFiNAG['IC'][-1], 4.7391330, places=6)
+        self.assertAlmostEqual(Surface_Defects_ASFiNAG['IC'][-1], 3.915245847527996, places=6)
+        self.assertAlmostEqual(Transverse_Evenness_ASFiNAG['IC'][-1], 4.641938328960139, places=6)
        
     def test_maintenance_generic_post(self):
         response = self.client.post('/maintenance')

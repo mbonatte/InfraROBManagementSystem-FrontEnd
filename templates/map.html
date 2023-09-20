@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	Map
+{% endblock %}
+
+{% block content %}
+<map>
+    
+    <label>
+        <input type="checkbox" checked=True id="show-section-names" style="text-align: left;"> Show Names
+    </label>
+    <label>
+        <input type="checkbox" id="show-grades" style="text-align: left;"> Show Grades
+    </label>
+    
+    <div id="big_div">
+        <!-- MAP -->
+        <div class="map_container">
+            <canvas id="map_canvas" width="600px" height="327.5px"></canvas>
+        </div>
+        
+        <!-- Road info -->
+        <div id="road_info" class="road-info">
+            <table id="road_properties"> </table>
+        </div>
+        
+        <!-- Graph -->
+        <div id="chart-wrapper">
+            <div id='performance_indicators'></div>
+            <canvas id="performanceChart" height="50px" width="100px"></canvas>
+        </div>
+    </div>
+    
+    <!-- Legend for No FOS -->
+    <div id="legend-no-fos" class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: black;"></div>
+            <div class="legend-label">No FOS</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: gray;"></div>
+            <div class="legend-label">Has FOS</div>
+        </div>
+    </div>
+    
+    <!-- Legend for Grade Scale (Initially hidden) -->
+    <div id="legend-grade-scale" class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: green;"></div>
+            <div class="legend-label">Very well</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #9ACD32;"></div>
+            <div class="legend-label">Good</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: yellow;"></div>
+            <div class="legend-label">Medium</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: orange;"></div>
+            <div class="legend-label">Poorly</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: red;"></div>
+            <div class="legend-label">Very bad</div>
+        </div>
+    </div>
+</map>
+
+<script>
+    // Pass the road data to the external JavaScript file
+    const roads = {{ roads | tojson | safe }};
+    
+    const legendGradeScale = document.getElementById('legend-grade-scale');
+    legendGradeScale.style.display = 'none';
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{url_for('static', filename='map.js')}}"></script>
+{% endblock %}
+	

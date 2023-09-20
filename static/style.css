@@ -149,7 +149,7 @@ manual img {
 }
 
 table, th, td {
-  font-size: 12px;
+  /* font-size: 12px; */
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -165,3 +165,61 @@ csl-entry {
   text-justify: inter-word;
 }
 
+
+#big_div {
+    display: flex;
+    align-items: flex-start;
+    /* border: 1px solid #000; */
+}
+
+
+/* Map */
+.map_container {
+    display: flex;
+    align-items: flex-start; /* Adjust alignment as needed */
+}
+
+#map_canvas {
+    border: 1px solid #000;
+}
+
+.road-info {
+    display: flex;
+    flex-direction: row; /* Display tables side by side */
+    margin-left: 20px; /* Add spacing between the canvas and tables */
+    margin-right: 20px; /* Add spacing between the canvas and tables */
+}
+
+.road-info table{
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+#big_div #chart-wrapper {
+    border: 1px solid #000;
+    margin-right: 0px;
+}
+
+/* Legend */
+
+.legend {
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000;
+}
+
+.legend-label {
+    margin-left: 5px;
+}
