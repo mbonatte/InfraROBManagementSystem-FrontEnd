@@ -9,6 +9,11 @@ const maintenanceModeIcon = document.getElementById('maintenance-mode');
 const optimizationModeIcon = document.getElementById('optimization-mode');
 
 
+function getCurrentMode(){
+    mode = current_mode.innerHTML.split(' ')[2].split('<')[0];
+    return mode;
+}
+
 const mapModeToFunction = {'visualize': switchToVisualizeMode,
                      'prediction': switchToPredictionMode,
                      'maintenance': switchToMaintenanceMode,
@@ -85,22 +90,170 @@ document.querySelectorAll('.sidebar-icon').forEach((icon) => {
     });
 });
 
+////////////////////////////////////////////////////////////////////
+
+function creatNumMaintenanceSelect(div){
+    // Create and append the "Select the number of maintenance actions" dropdown
+    const numMaintenanceSelect = document.createElement('select');
+    numMaintenanceSelect.id = 'numMaintenanceSelect';
+
+    const option_1 = document.createElement("option");
+    option_1.value = 'numMaintenance';
+    option_1.text = 'Select the number of maintenance actions:';
+    numMaintenanceSelect.appendChild(option_1);
+    
+    for (let i = 1; i < 5; i++) {
+        const option1 = document.createElement("option");
+        option1.value = i;
+        option1.text = i;
+        numMaintenanceSelect.appendChild(option1);
+    };
+    
+    div.appendChild(numMaintenanceSelect);
+    
+    return numMaintenanceSelect
+    
+};
+
+function addActionFields(div) {
+    const numMaintenanceSelect = creatNumMaintenanceSelect(div);
+    
+    // Create and append an event listener to generate the form on selection change
+    numMaintenanceSelect.addEventListener('change', createMaintenanceForm);
+    
+    // Create a container div for the form
+    const formContainer = document.createElement('div');
+    formContainer.id = 'formContainer';
+    
+    // Function to create the maintenance form based on the selected number of actions
+    function createMaintenanceForm() {
+        const numActions = parseInt(numMaintenanceSelect.value);
+        const time_horizon = 50;
+        
+        // Clear any previous form elements
+        formContainer.innerHTML = '';
+        
+        for (let i = 0; i < numActions; i++) {
+            const formGroup = document.createElement('div');
+            
+            // Create a time selection dropdown
+            const timeSelect = document.createElement('select');
+            timeSelect.id = "time-maintenance-" + (i+1);
+            for (let j = 0; j < time_horizon; j++) {
+                const timeOption = document.createElement("option");
+                if (j == 0) {
+                    timeOption.value = "";
+                    timeOption.text = "Select time:";
+                } else {
+                    timeOption.value = j;
+                    timeOption.text = j;
+                }
+                
+                timeSelect.add(timeOption);
+            }
+
+            // Create an action selection dropdown
+            const actionSelect = document.createElement('select');
+            actionSelect.id = "maintenance-action-" + (i+1);
+            const actionOption_ = document.createElement('option');
+            actionOption_.value = "";
+            actionOption_.textContent = "Select action:";
+            actionSelect.appendChild(actionOption_);
+            
+            for (const option of maintenanceActions) {
+                const actionOption = document.createElement('option');
+                actionOption.value = option.name;
+                actionOption.textContent = option.name;
+                actionSelect.appendChild(actionOption);
+            }
+            
+            formGroup.appendChild(timeSelect);
+            //formGroup.appendChild(document.createElement('br'));
+            formGroup.appendChild(actionSelect);
+            formContainer.appendChild(formGroup);
+            
+        }
+    }
+    
+    // Append elements to the infoDiv
+    div.appendChild(formContainer);
+    
+    // Create and append a button to submit the form data
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Submit Form';
+    submitButton.addEventListener('click', postDataToServer);
+    
+    // Append the submit button to the infoDiv
+    div.appendChild(submitButton);
+    
+    
+    
+}
+
+// Function to send data to the server via a POST request
+async function postDataToServer() {
+    if (!roadSelected){
+        return;
+    }
+    defaultChartMode(roadSelected);
+    
+    const numActions = parseInt(numMaintenanceSelect.value);
+
+    // Create an array to store the form data
+    let maintenanceData = {};
+    
+    for (let i = 0; i < numActions; i++) {
+        
+        const timeSelect = document.getElementById("time-maintenance-" + (i+1));
+        const actionSelect = document.getElementById("maintenance-action-" + (i+1));
+
+        // Get the selected time and action values
+        const timeValue = timeSelect.value;
+        const actionValue = actionSelect.value;
+
+        // Push the data for each action to the maintenanceData
+        maintenanceData[timeValue] = actionValue;
+    }
+
+    // Send the formData to the server via a POST request
+    // Fetch request for prediction based on road properties
+    
+    const formData = new FormData();
+    formData.append('maintenance', JSON.stringify(maintenanceData));
+    formData.append('road', JSON.stringify(roadSelected));
+    const response = await fetch('/maintenance/road', {method: 'POST',
+                                                  body: formData});
+    const prediction = await response.json();
+    
+    setChartMaintenanceMode(roadSelected, prediction);
+};
+
+////////////////////////////////////////////////////////////////////
+
 function setChart(road) {
+    console.log(`DEBUGGING - setChart - ${road['Section_Name']}`);
     performance_indicators.innerHTML = "";
     createChart('performanceChart', [], [], 'Year', '', road['Section_Name']);
     
     const mapModeToChart = {'visualize': setChartVizualizeMode,
                          'prediction': setChartPredictionMode,
-                         'maintenance': setChartVizualizeMode,
+                         'maintenance': defaultChartMode,
                          'optimization': setChartVizualizeMode
                          };
+    mode = getCurrentMode();
     
-    mode = current_mode.innerHTML.split(' ')[2].split('<')[0];
     mapModeToChart[mode](road);
     
 }
 
+function defaultChartMode(road){
+    console.log(`DEBUGGING - defaultChartMode - ${road['Section_Name']}`);
+    performance_indicators.innerHTML = "";
+    createChart('performanceChart', [], [], 'Year', '', road['Section_Name']);
+}
+
 function setChartVizualizeMode(road) {
+    console.log(`DEBUGGING - setChartVizualizeMode - ${road['Section_Name']}`);
     performance_indicators.innerHTML = "";
     createChart('performanceChart', [], [], 'Year', '', road['Section_Name']);
     
@@ -177,7 +330,8 @@ function setChartVizualizeMode(road) {
     });
 };
 
-async function setChartPredictionMode(road) {    
+async function setChartPredictionMode(road) {  
+    console.log(`DEBUGGING - setChartPredictionMode - ${road['Section_Name']}`);
     // Fetch request for prediction based on road properties
 	const formData = new FormData();
     formData.append('road', JSON.stringify(road));
@@ -219,141 +373,51 @@ async function setChartPredictionMode(road) {
         for (let i = 0; i < dates.length; i++) {
             new_dates.push(parseInt(dates[i]) + parseInt(year));
         }
-        console.log(prediction[performance_indicator])
+
+        createChart('performanceChart', new_dates, performance, 'Year', performance_indicator, road['Section_Name']);
+    });
+};
+
+function setChartMaintenanceMode(road, prediction) {
+    console.log(`DEBUGGING - setChartMaintenanceMode - ${road['Section_Name']}`);
+    performance_indicators.innerHTML = "";
+    PIList = Object.keys(prediction)
+    
+    // Create a selection which the user can select if he wants to see the EDP or transformed indicators.
+    const indicator = document.createElement("select");
+    indicator.name = "indicator";
+    indicator.id = "indicator";
+    
+    const option_1 = document.createElement("option");
+    option_1.value = 'Select';
+    option_1.text = 'Select';
+    indicator.add(option_1);
+    
+    for (let i = 0; i < PIList.length; i++) {
+        const option1 = document.createElement("option");
+        option1.value = PIList[i];
+        option1.text = PIList[i];
+        indicator.add(option1);
+        performance_indicators.appendChild(indicator);
+    }
+    
+    date = road.inspections[road.inspections.length - 1].Date.split('/');
+    year = date[2];
+    
+    performance_indicators.addEventListener('change', () => {
+        const performance_indicator = document.getElementById("indicator").value;
+        
+        let dates =  prediction[performance_indicator]['Time'];
+        let performance =  prediction[performance_indicator]['IC']
+        
+        // Use a loop to add the constant value to each element
+        const new_dates = [];
+        for (let i = 0; i < dates.length; i++) {
+            new_dates.push(parseInt(dates[i]) + parseInt(year));
+        }
+
         createChart('performanceChart', new_dates, performance, 'Year', performance_indicator, road['Section_Name']);
     });
 };
 
 
-function creatNumMaintenanceSelect(div){
-    // Create and append the "Select the number of maintenance actions" dropdown
-    const numMaintenanceSelect = document.createElement('select');
-    numMaintenanceSelect.id = 'numMaintenanceSelect';
-
-    const option_1 = document.createElement("option");
-    option_1.value = 'numMaintenance';
-    option_1.text = 'Select the number of maintenance actions:';
-    numMaintenanceSelect.appendChild(option_1);
-    
-    for (let i = 1; i < 5; i++) {
-        const option1 = document.createElement("option");
-        option1.value = i;
-        option1.text = i;
-        numMaintenanceSelect.appendChild(option1);
-    };
-    
-    div.appendChild(numMaintenanceSelect);
-    
-    return numMaintenanceSelect
-    
-};
-
-function addActionFields(div) {
-    const numMaintenanceSelect = creatNumMaintenanceSelect(div);
-    
-    // Create and append an event listener to generate the form on selection change
-    numMaintenanceSelect.addEventListener('change', createMaintenanceForm);
-    
-    // Create a container div for the form
-    const formContainer = document.createElement('div');
-    formContainer.id = 'formContainer';
-    
-    // Function to create the maintenance form based on the selected number of actions
-    function createMaintenanceForm() {
-        const numActions = parseInt(numMaintenanceSelect.value);
-        const time_horizon = 50;
-        
-        // Clear any previous form elements
-        formContainer.innerHTML = '';
-        
-        for (let i = 0; i < numActions; i++) {
-            const formGroup = document.createElement('div');
-            
-            // Create a time selection dropdown
-            const timeSelect = document.createElement('select');
-            for (let j = 0; j < time_horizon; j++) {
-                const timeOption = document.createElement("option");
-                if (j == 0) {
-                    timeOption.value = "";
-                    timeOption.text = "Select time:";
-                } else {
-                    timeOption.value = j;
-                    timeOption.text = j;
-                }
-                
-                timeSelect.add(timeOption);
-            }
-
-            // Create an action selection dropdown
-            const actionSelect = document.createElement('select');
-            const actionOption_ = document.createElement('option');
-            actionOption_.value = "";
-            actionOption_.textContent = "Select action:";
-            actionSelect.appendChild(actionOption_);
-            
-            for (const option of maintenanceActions) {
-                const actionOption = document.createElement('option');
-                actionOption.value = option.name;
-                actionOption.textContent = option.name;
-                actionSelect.appendChild(actionOption);
-            }
-            
-            formGroup.appendChild(timeSelect);
-            //formGroup.appendChild(document.createElement('br'));
-            formGroup.appendChild(actionSelect);
-            formContainer.appendChild(formGroup);
-            
-        }
-    }
-    
-    // Append elements to the infoDiv
-    div.appendChild(formContainer);
-    
-    // Create and append a button to submit the form data
-    const submitButton = document.createElement('button');
-    submitButton.textContent = 'Submit Form';
-    submitButton.addEventListener('click', postDataToServer);
-    
-    // Append the submit button to the infoDiv
-    div.appendChild(submitButton);
-    
-    // Function to send data to the server via a POST request
-    function postDataToServer() {
-        const numActions = parseInt(numMaintenanceSelect.value);
-
-        // Create an array to store the form data
-        const formData = {};
-
-        for (let i = 0; i < numActions; i++) {
-            const timeSelect = document.querySelector(`#timeSelect${i}`);
-            const actionSelect = document.querySelector(`#actionSelect${i}`);
-
-            // Get the selected time and action values
-            const timeValue = timeSelect.value;
-            const actionValue = actionSelect.value;
-
-            // Push the data for each action to the formData array
-            formData[time] = actionValue;
-        }
-
-        // Send the formData to the server via a POST request (you need to implement this part)
-        // Example of a POST request using the fetch API:
-        // fetch('/your-server-endpoint', {
-            // method: 'POST',
-            // headers: {
-                // 'Content-Type': 'application/json',
-            // },
-            // body: JSON.stringify(formData), // Send the form data as JSON
-        // })
-        // .then(response => response.json()) // Process the server response if needed
-        // .then(data => {
-            // // Handle the response data from the server
-            // console.log(data);
-        // })
-        // .catch(error => {
-            // // Handle any errors that occurred during the fetch request
-            // console.error('Error:', error);
-        // });
-    }
-    
-}

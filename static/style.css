@@ -86,7 +86,7 @@ home li {
 
 #chart-wrapper {
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
@@ -189,7 +189,7 @@ csl-entry {
     /* flex-direction: row; /* Display tables side by side */
     margin-left: 20px; /* Add spacing between the canvas and tables */
     /* margin-right: 20px; /* Add spacing between the canvas and tables */
-    padding: 10px;
+    padding: 0px;
     text-align: center;
 }
 

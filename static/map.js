@@ -9,7 +9,7 @@ const showNamesCheckbox = document.getElementById('show-section-names');
 const showGradesCheckbox = document.getElementById('show-grades');
 const performance_indicators = document.getElementById("performance_indicators");
 
-
+let roadSelected = null;
 
 // Event listener for the "Show Names" checkbox
 showNamesCheckbox.addEventListener('change', drawRoads);
@@ -75,6 +75,7 @@ canvas.addEventListener('click', (e) => {
         const endPixel = convertLatLngToCanvasPixel(road.yf, road.xf);
         if (isPointNearLine(mouseX, mouseY, startPixel.x, startPixel.y, endPixel.x, endPixel.y, 10)) {
             console.log(`DEBUGGING - roadSelected - ${road.Section_Name}`);
+            
             // Highlight the selected road
             highlightSelectedRoad(road)
             
@@ -84,6 +85,7 @@ canvas.addEventListener('click', (e) => {
             // Set the chart for the road
             setChart(road);
             
+            roadSelected = road;
             break; // Stop checking if a road is found
         }
     }
@@ -130,26 +132,29 @@ function handleEscapeKey(event) {
 
 // Function to set the road color based on the grade
 function setRoadColorByGrade(context, road) {
-    const grade = road['inspections'].slice(-1)[0].Global_ASFiNAG;
-    switch (grade) {
-        case 1:
-            context.strokeStyle = 'green';
-            break;
-        case 2:
-            context.strokeStyle = '#9ACD32';
-            break;
-        case 3:
-            context.strokeStyle = 'yellow';
-            break;
-        case 4:
-            context.strokeStyle = 'orange';
-            break;
-        case 5:
-            context.strokeStyle = 'red';
-            break;
-        default:
-            break;
-    }
+    try{
+        const grade = road['inspections'].slice(-1)[0].Global_ASFiNAG;
+    
+        switch (grade) {
+            case 1:
+                context.strokeStyle = 'green';
+                break;
+            case 2:
+                context.strokeStyle = '#9ACD32';
+                break;
+            case 3:
+                context.strokeStyle = 'yellow';
+                break;
+            case 4:
+                context.strokeStyle = 'orange';
+                break;
+            case 5:
+                context.strokeStyle = 'red';
+                break;
+            default:
+                break;
+        }
+    } catch{return;};
 }
 
 //function to display the names of the roads on canvas
@@ -192,7 +197,7 @@ function convertLatLngToCanvasPixel (lat, lng){
 window.addEventListener('load', drawRoads);
 function drawRoads() {
     context.clearRect(0, 0, canvas.width, canvas.height);
-    // Convert latitude and longitude to pixel coordinates    
+    roadSelected = null 
     
     roads.forEach((road, index) => {
         context.strokeStyle = road.hasFOS ? 'gray' : 'black';
@@ -234,13 +239,26 @@ function drawRoads() {
 // Function to display road information in a table within the infoDiv
 window.addEventListener('load', displayRoadInfo);
 function displayRoadInfo(road) {
+    try {
+        mode = getCurrentMode();
+        if (mode === 'maintenance'){
+            return;
+        }
+    } catch{}
+    
     console.log(`DEBUGGING - displayRoadInfo - ${road.Section_Name}`);
     const table = document.createElement('table');
     
     let last_inspection = {}
     if (Array.isArray(road['inspections'])) {
         last_inspection = road['inspections'].slice(-1)[0];
+        if (road['inspections'].length===0) {
+            last_inspection = {'Date': '?', 'Global_ASFiNAG':'?'};
+        };
     };
+    
+    
+    
 
     table.innerHTML = `
         <tr>

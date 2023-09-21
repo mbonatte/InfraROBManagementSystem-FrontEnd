@@ -134,6 +134,55 @@
 		"cost": 2.7					
 	},
 	{
+		"name": "Demolish",
+		"Bearing_Capacity": {
+					"improvement":   [
+											0, 0, 0, 
+											1, 1, 1, 
+											2, 2, 2, 
+											3, 3, 3, 
+											4, 4, 4
+											]
+		},
+		"Cracking": {
+					"improvement":   [
+											0, 0, 0, 
+											1, 1, 1, 
+											2, 2, 2, 
+											3, 3, 3, 
+											4, 4, 4
+											]
+		},
+		"Transverse_Evenness": {
+					"improvement":   [
+											0, 0, 0, 
+											1, 1, 1, 
+											2, 2, 2, 
+											3, 3, 3, 
+											4, 4, 4
+											]
+		},
+        "Longitudinal_Evenness": {
+					"improvement":   [
+											0, 0, 0, 
+											1, 1, 1, 
+											2, 2, 2, 
+											3, 3, 3, 
+											4, 4, 4
+											]
+		},
+        "Skid_Resistance": {
+					"improvement":   [
+											0, 0, 0, 
+											1, 1, 1, 
+											2, 2, 2, 
+											3, 3, 3, 
+											4, 4, 4
+											]
+		},
+		"cost": 5.6				
+	},
+    {
 		"name": "Surface treatments",
 		"Bearing_Capacity": {
 					"time_of_reduction":   [
