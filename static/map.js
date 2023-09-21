@@ -52,13 +52,15 @@ function isPointNearLine(x, y, x1, y1, x2, y2, tolerance = 5) {
 
 // Function to highlight the selected road
 function highlightSelectedRoad(road) {
+    const startPixel = convertLatLngToCanvasPixel(road.yi, road.xi);
+    const endPixel = convertLatLngToCanvasPixel(road.yf, road.xf);
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawRoads(); // Redraw all roads
     context.strokeStyle = 'cyan';
     context.lineWidth = road.category === 'primary' ? 5 : 4; // Adjust line width for highlight
     context.beginPath();
-    context.moveTo(road.xi * 50, road.yi * 50);
-    context.lineTo(road.xf * 50, road.yf * 50);
+    context.moveTo(startPixel.x, startPixel.y);
+    context.lineTo(endPixel.x, endPixel.y);
     context.stroke();
 }
 
@@ -69,7 +71,9 @@ canvas.addEventListener('click', (e) => {
 
     // Check if the click point is near any road
     for (const road of roads) {
-        if (isPointNearLine(mouseX, mouseY, road.xi * 50, road.yi * 50, road.xf * 50, road.yf * 50, 10)) {
+        const startPixel = convertLatLngToCanvasPixel(road.yi, road.xi);
+        const endPixel = convertLatLngToCanvasPixel(road.yf, road.xf);
+        if (isPointNearLine(mouseX, mouseY, startPixel.x, startPixel.y, endPixel.x, endPixel.y, 10)) {
             console.log(`DEBUGGING - roadSelected - ${road.Section_Name}`);
             // Highlight the selected road
             highlightSelectedRoad(road)
@@ -84,6 +88,45 @@ canvas.addEventListener('click', (e) => {
         }
     }
 });
+
+// Function to handle mousemove events
+function handleMouseMove(e) {
+    const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+    const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+    // Check if the mouse is over any road
+    let mouseOverRoad = false;
+    roads.forEach((road) => {
+        const startPixel = convertLatLngToCanvasPixel(road.yi, road.xi);
+        const endPixel = convertLatLngToCanvasPixel(road.yf, road.xf);
+        if (isPointNearLine(mouseX, mouseY, startPixel.x, startPixel.y, endPixel.x, endPixel.y, 10)) {
+            mouseOverRoad = true;
+        }
+    });
+
+    // Update the cursor style based on whether the mouse is over a road
+    canvas.style.cursor = mouseOverRoad ? 'pointer' : 'move';
+}
+
+// Add an event listener for the "keydown" event on the document
+document.addEventListener('keydown', handleEscapeKey);
+
+// Function to handle the "ESC" key press event
+function handleEscapeKey(event) {
+    if (event.key === 'Escape' || event.key === 'Esc') {
+        console.log('DEBUGGING - handleEscapeKey - Clear information');
+        
+        // Redraw the roads
+        drawRoads();
+
+        // Clear the info properties
+        displayRoadInfo({});
+        
+        // Clear the graph
+        performance_indicators.innerHTML = "";
+        createChart('performanceChart', [], [], 'Year', '', '');
+    }
+}
 
 // Function to set the road color based on the grade
 function setRoadColorByGrade(context, road) {
@@ -111,12 +154,18 @@ function setRoadColorByGrade(context, road) {
 
 //function to display the names of the roads on canvas
 function displayRoadsNames (context, road){
-    context.save();
-        
-    // Calculate the angle of the line
-    const angle = Math.atan2((road.yf - road.yi) * 50, (road.xf - road.xi) * 50);
+    const startPixel = convertLatLngToCanvasPixel(road.yi, road.xi);
+    const endPixel = convertLatLngToCanvasPixel(road.yf, road.xf);
     
-    context.translate((road.xi + road.xf) * 50 / 2, (road.yi + road.yf) * 50 / 2);
+    context.save();    
+    // Calculate the angle of the line
+    let angle = Math.atan2((endPixel.y - startPixel.y), (endPixel.x - startPixel.x));
+    
+    if (Math.abs(angle) > 1.5) {
+        angle = angle + 3.1415
+    }
+    
+    context.translate((startPixel.x + endPixel.x)/ 2, (startPixel.y + endPixel.y)/ 2);
     context.rotate(angle);
     
     // Add road names as text labels aligned with the lines
@@ -125,18 +174,26 @@ function displayRoadsNames (context, road){
     context.textAlign = 'center';
     
     // Calculate the text position along the line
-    const textX = 0//(road.xi * 50 + road.xf * 50) / 2 + Math.cos(angle) * 15; // Offset by 15 pixels along the line
-    const textY = 0//(road.yi * 50 + road.yf * 50) / 2 + Math.sin(angle) * 15; // Offset by 15 pixels along the line
+    const textX = 0//(startPixel.x * 50 + endPixel.x * 50) / 2 + Math.cos(angle) * 15; // Offset by 15 pixels along the line
+    const textY = 0//(startPixel.y * 50 + endPixel.y * 50) / 2 + Math.sin(angle) * 15; // Offset by 15 pixels along the line
     
     context.fillText(road.Section_Name, 0, 10);
     
     context.restore();
 }
 
+function convertLatLngToCanvasPixel (lat, lng){
+    const LatLng = L.latLng(lat, lng);
+    const Pixel = map.latLngToLayerPoint(LatLng);
+    return Pixel;
+}
+
 // Function to draw roads on the canvas
 window.addEventListener('load', drawRoads);
 function drawRoads() {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    // Convert latitude and longitude to pixel coordinates    
+    
     roads.forEach((road, index) => {
         context.strokeStyle = road.hasFOS ? 'gray' : 'black';
         
@@ -146,24 +203,31 @@ function drawRoads() {
         };
         
         context.lineWidth = road.Road_Category === 'primary' ? 5 : 2;
+        // Convert latitude and longitude to pixel coordinates
+        const startPixel = convertLatLngToCanvasPixel(road.yi, road.xi);
+        const endPixel = convertLatLngToCanvasPixel(road.yf, road.xf);
+        
         context.beginPath();
-        context.moveTo(road.xi * 50, road.yi * 50);
-        context.lineTo(road.xf * 50, road.yf * 50);
+        context.moveTo(startPixel.x, startPixel.y);
+        context.lineTo(endPixel.x, endPixel.y);
         context.stroke();
         
         // Draw dots at the beginning and end
         const dotRadius = 5;
         context.fillStyle = 'black'; // Dot color
         context.beginPath();
-        context.arc(road.xi * 50, road.yi * 50, dotRadius, 0, Math.PI * 2);
+        context.arc(startPixel.x, startPixel.y, dotRadius, 0, Math.PI * 2);
         context.fill();
         context.beginPath();
-        context.arc(road.xf * 50, road.yf * 50, dotRadius, 0, Math.PI * 2);
+        context.arc(endPixel.x, endPixel.y, dotRadius, 0, Math.PI * 2);
         context.fill();
         
         if (showNamesCheckbox.checked){
             displayRoadsNames(context, road);
         };
+        
+        // Add a single event listener for mousemove on the canvas
+        canvas.addEventListener('mousemove', handleMouseMove);
     });
 }
 

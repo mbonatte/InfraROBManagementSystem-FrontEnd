@@ -177,6 +177,7 @@ csl-entry {
 .map_container {
     display: flex;
     align-items: flex-start; /* Adjust alignment as needed */
+    z-index: 0; /* Lower z-index value for the map container */
 }
 
 #map_canvas {
@@ -241,6 +242,8 @@ csl-entry {
     padding-top: 20px; /* Add top padding for icons */
     transition: width 0.3s;
     overflow-x: hidden;
+    z-index: 3; /* Higher z-index value for the sidebar */
+    opacity: 1,
 }
 
 /* Sidebar icon styles */

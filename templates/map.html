@@ -5,6 +5,11 @@
 {% endblock %}
 
 {% block content %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
 <map>
     <!-- sidebar -->
     <div id="sidebar">
@@ -37,8 +42,8 @@
     
     <div id="big_div">
         <!-- MAP -->
-        <div class="map_container">
-            <canvas id="map_canvas" width="600px" height="327.5px"></canvas>
+        <div id='map_container' class="map_container">
+            <canvas id="map_canvas" width="600px" height="450px"></canvas>
         </div>
         
         <!-- Road info -->
@@ -48,7 +53,7 @@
         <!-- Graph -->
         <div id="chart-wrapper">
             <div id='performance_indicators'></div>
-            <canvas id="performanceChart" height="50px" width="100px"></canvas>
+            <canvas id="performanceChart" height="70px" width="100px"></canvas>
         </div>
     </div>
     
@@ -100,8 +105,41 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
 <script src="{{url_for('static', filename='map.js')}}"></script>
 <script src="{{url_for('static', filename='modes.js')}}"></script>
 <script src="{{url_for('static', filename='sidebar.js')}}"></script>
+
+<script>
+        // Initialize the map
+        const map = L.map('map_container').setView([41.4455, -8.28708], 16);
+                       
+        // Load a map tile layer (e.g., OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            minZoom: 16,
+            maxZoom: 16,
+            <!-- bounds: [[41.4443, -8.286], -->
+                     <!-- [41.4445, -8.288]] -->
+            opacity: 0.3,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Define bounds (latitude and longitude)
+        const northEast = L.latLng(41.447, -8.288);
+        const southWest = L.latLng(41.444, -8.286);
+        const bounds = L.latLngBounds(southWest, northEast);
+
+        // Set the map's max bounds to restrict panning and zooming
+        map.setMaxBounds(bounds)
+        
+
+        // Initialize the overlay canvas
+        <!-- const overlayCanvas = document.getElementById('overlay'); -->
+        <!-- overlayCanvas.width = map.getSize().x; -->
+        <!-- overlayCanvas.height = map.getSize().y; -->
+        <!-- const overlayContext = overlayCanvas.getContext('2d'); -->
+</script>
 {% endblock %}
 	
