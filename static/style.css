@@ -184,10 +184,12 @@ csl-entry {
 }
 
 .road-info {
-    display: flex;
-    flex-direction: row; /* Display tables side by side */
+    /* display: flex; */
+    /* flex-direction: row; /* Display tables side by side */
     margin-left: 20px; /* Add spacing between the canvas and tables */
-    margin-right: 20px; /* Add spacing between the canvas and tables */
+    /* margin-right: 20px; /* Add spacing between the canvas and tables */
+    padding: 10px;
+    text-align: center;
 }
 
 .road-info table{
@@ -222,4 +224,45 @@ csl-entry {
 
 .legend-label {
     margin-left: 5px;
+}
+
+/* Sidebar styles */
+#sidebar {
+    width: 0px; /* Adjust the width as needed */
+    background-color: #333; /* Sidebar background color */
+    height: 100%; /* Full height */
+    position: fixed; /* Fixed position */
+    top: 0;
+    left: 0;
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px; /* Add top padding for icons */
+    transition: width 0.3s;
+    overflow-x: hidden;
+}
+
+/* Sidebar icon styles */
+.sidebar-icon {
+    margin-bottom: 20px; /* Add spacing between icons */
+    text-align: center;
+    cursor: pointer;
+}
+
+.sidebar-icon img {
+    width: 40px; /* Adjust icon width */
+    height: 40px; /* Adjust icon height */
+}
+
+.sidebar-icon span {
+    display: block;
+    margin-top: 5px; /* Add spacing between icon and text */
+    color: #fff; /* Icon text color */
+    font-size: 14px; /* Icon text font size */
+}
+
+/* Style for the active mode icon */
+.sidebar-icon.active {
+    background-color: #555; /* Highlighted background color */
 }

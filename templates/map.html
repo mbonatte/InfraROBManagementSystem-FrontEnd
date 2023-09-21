@@ -6,6 +6,27 @@
 
 {% block content %}
 <map>
+    <!-- sidebar -->
+    <div id="sidebar">
+        <div class="sidebar-icon" id="visualize-mode">
+            <img title="Visualize" src="{{ url_for('static', filename='visualize-icon.png') }}" alt="Visualize Mode">
+        </div>
+        <div class="sidebar-icon" id="prediction-mode">
+            <img title="Prediction" src="{{ url_for('static', filename='prediction-icon.png') }}" alt="Prediction Mode">
+        </div>
+        <div class="sidebar-icon" id="maintenance-mode">
+            <img title="Maintenance" src="{{ url_for('static', filename='maintenance-icon.png') }}" alt="Maintenance Mode">
+        </div>
+        <div class="sidebar-icon" id="optimization-mode">
+            <img title="Optimization" src="{{ url_for('static', filename='optimization-icon.png') }}" alt="Optimization Mode">
+        </div>
+    </div>
+    
+    <!-- Content -->
+    <div id="current-mode">
+        <!-- Main content here -->
+        <h1></h1>
+    </div>
     
     <label>
         <input type="checkbox" checked=True id="show-section-names" style="text-align: left;"> Show Names
@@ -22,7 +43,6 @@
         
         <!-- Road info -->
         <div id="road_info" class="road-info">
-            <table id="road_properties"> </table>
         </div>
         
         <!-- Graph -->
@@ -73,11 +93,15 @@
     // Pass the road data to the external JavaScript file
     const roads = {{ roads | tojson | safe }};
     
+    const maintenanceActions = {{ maintenanceActions | tojson | safe }};
+    
     const legendGradeScale = document.getElementById('legend-grade-scale');
     legendGradeScale.style.display = 'none';
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{url_for('static', filename='map.js')}}"></script>
+<script src="{{url_for('static', filename='modes.js')}}"></script>
+<script src="{{url_for('static', filename='sidebar.js')}}"></script>
 {% endblock %}
 	
