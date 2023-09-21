@@ -51,6 +51,11 @@ function switchToPOptimizationMode() {
     // Implement logic to switch to Prediction Mode
     // For example, update the UI and make prediction requests
     
+    addOptimizationFields(infoDiv);
+    
+    //createChart('newChart', data.Performance, data.Cost, 'Area under curve', 'Cost', `Pareto curve - ${result_id}`);
+    //plotDummies(data.Dummies)
+    //addResultFields(data);
 }
 
 // Function to switch modes
@@ -77,6 +82,9 @@ function switchMode(mode='visualize') {
     if (mode === 'maintenance') {
             infoDiv.innerHTML = '';
             switchToMaintenanceMode();
+    } else if (mode === 'optimization') {
+            infoDiv.innerHTML = '';
+            switchToPOptimizationMode();
     } else {
         displayRoadInfo({});
     };
@@ -91,7 +99,7 @@ document.querySelectorAll('.sidebar-icon').forEach((icon) => {
 });
 
 ////////////////////////////////////////////////////////////////////
-
+// MAINTENANCE //
 function creatNumMaintenanceSelect(div){
     // Create and append the "Select the number of maintenance actions" dropdown
     const numMaintenanceSelect = document.createElement('select');
@@ -229,6 +237,146 @@ async function postDataToServer() {
 };
 
 ////////////////////////////////////////////////////////////////////
+// OPTIMIZATION //
+function addOptimizationFields(div, content={}) {   
+    div.innerHTML = "";
+
+    const resultSelection = document.createElement('div');
+    resultSelection.id = 'result-selection';
+    
+    resultSelection.addEventListener('change', () => {
+        const result = document.getElementById("individualResult");
+        const label = result.options[result.selectedIndex].text;
+        const perf = content.Performance[result.value];
+        const cost = content.Cost[result.value];
+        addNewPointGraph(perf, cost, label);
+        
+        changeActionsText(content.Actions_schedule[result.value]);
+        
+        const x = content.Markov[result.value].Time
+        const y = content.Markov[result.value].IC
+        plotOptimizationPrediction(x, y, label);
+    });
+
+    addResultFields(resultSelection, content);
+    
+    // Append elements to the infoDiv
+    div.appendChild(resultSelection);
+    
+    /////////////////////////////////////////////////////////
+    //Add new Graph to div
+    const paretoChartWrapper = document.createElement('div');
+    paretoChartWrapper.id = 'pareto-chart-wrapper';
+    
+    const paretoChart = document.createElement('canvas');
+    paretoChart.id = 'pareto-chart';
+    paretoChart.width = 450;
+    paretoChart.height = 300;
+    // paretoChart.width = width;
+    
+    paretoChartWrapper.appendChild(paretoChart);
+    
+    div.appendChild(paretoChartWrapper);
+    /////////////////////////////////////////////////////////
+    //Add text to write maintenance schedule
+    const maintenanceSchedule = document.createElement('table');
+    maintenanceSchedule.id = 'maintenance-schedule-text';
+    
+    div.appendChild(maintenanceSchedule);
+}
+
+function addResultFields(selectDiv, content) {
+    try{content.Performance.length;}
+    catch{return;};
+    
+	const result = document.createElement("select");
+	result.name = "individualResult";
+	result.id = "individualResult";
+	
+	const option_ = document.createElement("option");
+	option_.value = 'Select maintenance schedule';
+	option_.text = 'Select maintenance schedule';
+	result.add(option_);
+	
+	for (let i = 0; i < content.Performance.length; i++) {
+		const option1 = document.createElement("option");
+		option1.value = i;
+		option1.text = `Maintenance schedule ${i+1}`;
+		result.add(option1);
+	}
+    selectDiv.appendChild(result);
+}
+
+function addNewPointGraph(x, y, label){
+	new_chart = Chart.getChart('pareto-chart');
+	
+	// Get the chart data
+	const chartData = new_chart.data;
+	
+	// Add a new dataset
+		const selectedResult = {
+		  type: 'scatter',
+		  label: label,
+		  data: [{	x: x,
+					y: y
+				}],
+		  backgroundColor: 'rgba(0, 0, 0, 1)',
+		  borderColor: 'rgba(0, 0, 0, 1)',
+		  borderWidth: 4
+		};
+	
+	if (chartData.datasets.length < 3){
+		// Add the new dataset to the datasets array
+		chartData.datasets.push(selectedResult);
+	}
+	else {
+		// Remove the last dataset to the datasets array
+		chartData.datasets.pop();
+		// Add the new dataset to the datasets array
+		chartData.datasets.push(selectedResult);
+	}
+	// Update the chart
+		new_chart.update();
+};
+
+function changeActionsText(result){
+	const actions_text = document.getElementById("maintenance-schedule-text");
+    
+    actions_text.innerHTML = `
+        <tr>
+            <th colspan="2">Maintenance Schedule</th>
+        </tr>
+        <tr>
+            <th>Time</th>
+            <th>Action</th>
+        </tr>
+        `
+    
+    // Iterate through the data and create table rows and cells
+    for (const time in result) {
+        const action = result[time];
+        console.log(action);
+        const row = actions_text.insertRow();
+        
+        // Create table cells for "Time" and "Action"
+        const timeCell = row.insertCell(0);
+        timeCell.textContent = time;
+        
+        const actionCell = row.insertCell(1);
+        actionCell.textContent = action;
+    }
+    
+	// actions_text.innerHTML = `Actions = ${JSON.stringify(result)}`;
+    
+        
+	
+}
+
+function plotOptimizationPrediction(x, y, label) {	
+	createChart('performanceChart', x, y, 'Time', 'IC', label);
+};
+
+////////////////////////////////////////////////////////////////////
 
 function setChart(road) {
     console.log(`DEBUGGING - setChart - ${road['Section_Name']}`);
@@ -238,7 +386,7 @@ function setChart(road) {
     const mapModeToChart = {'visualize': setChartVizualizeMode,
                          'prediction': setChartPredictionMode,
                          'maintenance': defaultChartMode,
-                         'optimization': setChartVizualizeMode
+                         'optimization': setChartOptimizationMode
                          };
     mode = getCurrentMode();
     
@@ -347,8 +495,8 @@ async function setChartPredictionMode(road) {
     indicator.id = "indicator";
     
     const option_1 = document.createElement("option");
-    option_1.value = 'Select';
-    option_1.text = 'Select';
+    option_1.value = 'Select PI';
+    option_1.text = 'Select PI';
     indicator.add(option_1);
     
     for (let i = 0; i < PIList.length; i++) {
@@ -389,8 +537,8 @@ function setChartMaintenanceMode(road, prediction) {
     indicator.id = "indicator";
     
     const option_1 = document.createElement("option");
-    option_1.value = 'Select';
-    option_1.text = 'Select';
+    option_1.value = 'Select PI';
+    option_1.text = 'Select PI';
     indicator.add(option_1);
     
     for (let i = 0; i < PIList.length; i++) {
@@ -420,4 +568,80 @@ function setChartMaintenanceMode(road, prediction) {
     });
 };
 
+function setChartOptimizationMode(road) {  
+    
+    data = road.optimization;
+    
+    addOptimizationFields(infoDiv, data)
+    
+    createChart('pareto-chart', data.Performance, data.Cost, 'Area under curve', 'Cost', 'Pareto curve');
+    plotDummies(data.Dummies)
+              
+    // PIList = Object.keys(prediction)
+    
+    // // Create a selection which the user can select if he wants to see the EDP or transformed indicators.
+    // const indicator = document.createElement("select");
+    // indicator.name = "indicator";
+    // indicator.id = "indicator";
+    
+    // const option_1 = document.createElement("option");
+    // option_1.value = 'Select';
+    // option_1.text = 'Select';
+    // indicator.add(option_1);
+    
+    // for (let i = 0; i < PIList.length; i++) {
+        // const option1 = document.createElement("option");
+        // option1.value = PIList[i];
+        // option1.text = PIList[i];
+        // indicator.add(option1);
+        // performance_indicators.appendChild(indicator);
+    // }
+    
+    // date = road.inspections[road.inspections.length - 1].Date.split('/');
+    // year = date[2];
+    
+    // performance_indicators.addEventListener('change', () => {
+        // const performance_indicator = document.getElementById("indicator").value;
+        
+        // let dates =  prediction[performance_indicator]['Time'];
+        // let performance =  prediction[performance_indicator]['IC']
+        
+        // // Use a loop to add the constant value to each element
+        // const new_dates = [];
+        // for (let i = 0; i < dates.length; i++) {
+            // new_dates.push(parseInt(dates[i]) + parseInt(year));
+        // }
 
+        // createChart('pareto-chart', new_dates, performance, 'Year', performance_indicator, road['Section_Name']);
+    // });
+};
+
+function plotDummies(dummies){
+	new_chart = Chart.getChart('pareto-chart');
+	
+	// Get the chart data
+	const chartData = new_chart.data;
+	
+	// Convert to data array
+    var data = [];
+    for (var i = 0; i < dummies.Performance.length; i++) {
+      data.push({ x: dummies.Performance[i], y: dummies.Cost[i] });
+    }
+	console.log(data)
+	// Add a new dataset
+		const result = {
+		  type: 'scatter',
+		  label: 'Dummies',
+		  data: data,
+		  backgroundColor: 'rgba(220,220,220, 0.5)',
+		  borderColor: 'rgba(220,220,220, 0.5)',
+		  borderWidth: 3
+		};
+	
+    if (chartData.datasets.length > 1){
+        chartData.datasets.pop();
+    }
+	chartData.datasets.push(result);
+	// Update the chart
+	new_chart.update();
+};

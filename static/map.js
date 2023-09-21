@@ -241,7 +241,7 @@ window.addEventListener('load', displayRoadInfo);
 function displayRoadInfo(road) {
     try {
         mode = getCurrentMode();
-        if (mode === 'maintenance'){
+        if (mode === 'maintenance' || mode === 'optimization' ){
             return;
         }
     } catch{}
