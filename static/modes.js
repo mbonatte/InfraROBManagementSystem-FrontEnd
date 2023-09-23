@@ -355,7 +355,6 @@ function changeActionsText(result){
     // Iterate through the data and create table rows and cells
     for (const time in result) {
         const action = result[time];
-        console.log(action);
         const row = actions_text.insertRow();
         
         // Create table cells for "Time" and "Action"
@@ -381,7 +380,6 @@ function plotOptimizationPrediction(x, y, label) {
 function setChart(road) {
     console.log(`DEBUGGING - setChart - ${road['Section_Name']}`);
     performance_indicators.innerHTML = "";
-    createChart('performanceChart', [], [], 'Year', '', road['Section_Name']);
     
     const mapModeToChart = {'visualize': setChartVizualizeMode,
                          'prediction': setChartPredictionMode,
@@ -436,6 +434,8 @@ function setChartVizualizeMode(road) {
     
     // based on the selection of the user, shows the EDP or PI list
     EDP_PI.addEventListener('change', () => {
+        console.log(`DEBUGGING - change_EDP_PI - ${document.getElementById("EDP_PI").value}`);
+        
         if (performance_indicators.childElementCount > 1) {
             performance_indicators.removeChild(performance_indicators.lastChild);
         }
@@ -466,20 +466,24 @@ function setChartVizualizeMode(road) {
             indicator.add(option1);
             performance_indicators.appendChild(indicator);
         }
-    });
-
-    performance_indicators.addEventListener('change', () => {
-        const performance_indicator = document.getElementById("indicator").value;
-        
-        let dates =  road['inspections'].map(obj => obj.Date)//.map(date => new Date(date));
-        let performance =  road['inspections'].map(obj => obj[performance_indicator]);
-        
-        createChart('performanceChart', dates, performance, 'Year', performance_indicator, road['Section_Name']);
+        indicator.addEventListener('change', () => {
+            console.log(`DEBUGGING - change_PI - ${document.getElementById("indicator").value}`);
+            
+            const performance_indicator = document.getElementById("indicator").value;
+            
+            let dates =  road['inspections'].map(obj => obj.Date)//.map(date => new Date(date));
+            let performance =  road['inspections'].map(obj => obj[performance_indicator]);
+            
+            createChart('performanceChart', dates, performance, 'Year', performance_indicator, road['Section_Name']);
+        });
     });
 };
 
 async function setChartPredictionMode(road) {  
     console.log(`DEBUGGING - setChartPredictionMode - ${road['Section_Name']}`);
+    
+    createChart('performanceChart', [], [], 'Year', '', road['Section_Name']);
+    
     // Fetch request for prediction based on road properties
 	const formData = new FormData();
     formData.append('road', JSON.stringify(road));
@@ -510,7 +514,7 @@ async function setChartPredictionMode(road) {
     date = road.inspections[road.inspections.length - 1].Date.split('/');
     year = date[2];
     
-    performance_indicators.addEventListener('change', () => {
+    indicator.addEventListener('change', () => {
         const performance_indicator = document.getElementById("indicator").value;
         
         let dates =  prediction[performance_indicator]['Time'];
@@ -574,46 +578,49 @@ function setChartOptimizationMode(road) {
     
     addOptimizationFields(infoDiv, data)
     
-    createChart('pareto-chart', data.Performance, data.Cost, 'Area under curve', 'Cost', 'Pareto curve');
-    plotDummies(data.Dummies)
-              
-    // PIList = Object.keys(prediction)
-    
-    // // Create a selection which the user can select if he wants to see the EDP or transformed indicators.
-    // const indicator = document.createElement("select");
-    // indicator.name = "indicator";
-    // indicator.id = "indicator";
-    
-    // const option_1 = document.createElement("option");
-    // option_1.value = 'Select';
-    // option_1.text = 'Select';
-    // indicator.add(option_1);
-    
-    // for (let i = 0; i < PIList.length; i++) {
-        // const option1 = document.createElement("option");
-        // option1.value = PIList[i];
-        // option1.text = PIList[i];
-        // indicator.add(option1);
-        // performance_indicators.appendChild(indicator);
-    // }
-    
-    // date = road.inspections[road.inspections.length - 1].Date.split('/');
-    // year = date[2];
-    
-    // performance_indicators.addEventListener('change', () => {
-        // const performance_indicator = document.getElementById("indicator").value;
-        
-        // let dates =  prediction[performance_indicator]['Time'];
-        // let performance =  prediction[performance_indicator]['IC']
-        
-        // // Use a loop to add the constant value to each element
-        // const new_dates = [];
-        // for (let i = 0; i < dates.length; i++) {
-            // new_dates.push(parseInt(dates[i]) + parseInt(year));
-        // }
+    var data_x_y = [];
 
-        // createChart('pareto-chart', new_dates, performance, 'Year', performance_indicator, road['Section_Name']);
-    // });
+    for (var i = 0; i < data.Performance.length; i++) {
+        data_x_y.push({ 'x': data.Performance[i], 'y': data.Cost[i] });
+    }
+    
+    const ctx = document.getElementById('pareto-chart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          // labels: data_x,
+          datasets: [{
+            label: 'Pareto curve',
+            data: data_x_y,
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: 'linear',
+              title: {
+                display: true,
+                text: 'Area under curve',
+              }
+            },
+            y: {
+              type: 'linear',
+              title: {
+                display: true,
+                text: 'Cost',
+              }
+            },
+          },
+          //maintainAspectRatio: false
+        }
+    });
+    
+    plotDummies(data.Dummies)
+
 };
 
 function plotDummies(dummies){
@@ -624,10 +631,10 @@ function plotDummies(dummies){
 	
 	// Convert to data array
     var data = [];
-    for (var i = 0; i < dummies.Performance.length; i++) {
+    for (let i = 0; i < dummies.Performance.length; i++) {
       data.push({ x: dummies.Performance[i], y: dummies.Cost[i] });
     }
-	console.log(data)
+	
 	// Add a new dataset
 		const result = {
 		  type: 'scatter',
@@ -642,6 +649,7 @@ function plotDummies(dummies){
         chartData.datasets.pop();
     }
 	chartData.datasets.push(result);
+    
 	// Update the chart
 	new_chart.update();
 };

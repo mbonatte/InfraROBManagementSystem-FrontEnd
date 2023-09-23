@@ -79,7 +79,7 @@
 		"cost": 10					
 	},
 	{
-		"name": "Milling (≤5cm) + TC + SC",
+		"name": "Milling (<5cm) + TC + SC",
 		"time_of_reduction":   [15, 15, 15, 
 								15, 15, 15, 
 								15, 15, 15, 

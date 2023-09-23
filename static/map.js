@@ -237,7 +237,7 @@ function drawRoads() {
 }
 
 // Function to display road information in a table within the infoDiv
-window.addEventListener('load', displayRoadInfo);
+// window.addEventListener('load', displayRoadInfo);
 function displayRoadInfo(road) {
     try {
         mode = getCurrentMode();
@@ -307,6 +307,8 @@ function displayRoadInfo(road) {
 // Call the function to create chart when the page loads
 createChart('performanceChart', [], [], 'Year', '', '');
 function createChart(canvas_name, data_x, data_y, x_label, y_label, data_title) {
+    console.log(`DEBUGGING - createChart - ${data_title}`);
+    
 	// Create a Chart.js chart
 	let myChart = Chart.getChart(canvas_name);
 	if (myChart) {
