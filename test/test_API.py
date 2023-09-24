@@ -5,6 +5,10 @@ import io
 import random
 import json
 
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
+
+
 import numpy as np
 
 from app import app
@@ -135,102 +139,94 @@ class TestFlaskApp(unittest.TestCase):
         
         self.assertAlmostEqual(IC[-1], 2.97, places=2)
     
-    # def test_maintenance_asfinag_post(self):
-        # response = self.client.post('/maintenance')
-        # assert response.status_code == 400
+    def test_maintenance_asfinag_post(self):
+        response = self.client.post('/maintenance')
+        assert response.status_code == 400
         
-        # # Create a FormData-like dictionary
-        # data = {}
+        # Create a FormData-like dictionary
+        data = {}
         
-        # # Add values to the data dictionary
-        # data['institution'] = json.dumps('ASFiNAG')
-        # data['worst_best_IC'] = json.dumps({'worst_IC': 5, 'best_IC': 1})
-        # data['time_block'] = json.dumps('year')
-        # data['time_horizon'] = json.dumps(50)
+        # Add values to the data dictionary
+        data['institution'] = json.dumps('ASFiNAG')
+        data['worst_best_IC'] = json.dumps({'worst_IC': 5, 'best_IC': 1})
+        data['time_block'] = json.dumps('year')
+        data['time_horizon'] = json.dumps(50)
         
-        # data['inspectionsFile'] = self.inspections_file_generic
-        # data['propertiesFile'] = self.properties_file_asfinag
-        # data['maintenanceFile'] = self.actions_file
+        data['inspectionsFile'] = self.inspections_file_asfinag
+        data['propertiesFile'] = self.properties_file_asfinag
+        data['maintenanceFile'] = self.actions_file
         
-        # data['maintenanceScenario'] = json.dumps({})
+        data['maintenanceScenario'] = json.dumps({})
         
-        # random.seed(1)
-        # response = self.client.post('/maintenance',
-                               # data=data,
-                               # content_type='multipart/form-data',
-                               # follow_redirects=True,
-                               # )
+        random.seed(1)
+        response = self.client.post('/maintenance',
+                               data=data,
+                               content_type='multipart/form-data',
+                               follow_redirects=True,
+                               )
         
-        # IC = json.loads(response.data.decode('utf-8'))#['IC']
-        # print(IC)
-        #self.assertAlmostEqual(IC[-1], 2.97, places=2)
+        IC = json.loads(response.data.decode('utf-8'))#['IC']
+        self.assertAlmostEqual(IC['Transverse_Evenness_ASFiNAG']['IC'][-1], 4.57, places=2)
+        self.assertAlmostEqual(IC['Surface_Defects_ASFiNAG']['IC'][-1], 3.87, places=2)
+        self.assertAlmostEqual(IC['Skid_Resistance_ASFiNAG']['IC'][-1], 2.0, places=2)
+        self.assertAlmostEqual(IC['Longitudinal_Evenness_ASFiNAG']['IC'][-1], 2.99, places=2)
+        self.assertAlmostEqual(IC['Cracking_ASFiNAG']['IC'][-1], 4.89, places=2)
+        self.assertAlmostEqual(IC['Bearing_Capacity_ASFiNAG']['IC'][-1], 3.67, places=2)
 
-    # def test_optimization_generic_post(self):
-        # response = self.client.post('/optimization')
-        # assert response.status_code == 400
+    def test_optimization_generic_post(self):
+        response = self.client.post('/optimization')
+        assert response.status_code == 400
         
-        # # Create a FormData-like dictionary
-        # data = {}
+        # Create a FormData-like dictionary
+        data = {}
         
-        # # Add values to the data dictionary
-        # data['institution'] = json.dumps('Generic')
-        # data['worst_best_IC'] = json.dumps({'worst_IC': 5, 'best_IC': 1})
-        # data['time_block'] = json.dumps('year')
-        # data['time_horizon'] = json.dumps(50)
+        # Add values to the data dictionary
+        data['institution'] = json.dumps('Generic')
+        data['worst_best_IC'] = json.dumps({'worst_IC': 5, 'best_IC': 1})
+        data['time_block'] = json.dumps('year')
+        data['time_horizon'] = json.dumps(50)
         
-        # data['inspectionsFile'] = self.inspections_file_generic
-        # #data['maintenanceFile'] = self.actions_file
+        data['inspectionsFile'] = self.inspections_file_generic
+        data['maintenanceFile'] = self.actions_file
         
-        # actions = [{"name": 'action_1',
-                   # "time_of_reduction": [
-                                        # 0, 0, 0, 
-                                        # 5, 5, 5, 
-                                        # 5, 5, 5, 
-                                        # 0, 0, 0, 
-                                        # 0, 0, 0
-                                    # ],
-                   # "reduction_rate":    [
-                                        # 0, 0, 0, 
-                                        # 0.1, 0.1, 0.1,
-                                        # 0.1, 0.1, 0.1,
-                                        # 0, 0, 0, 
-                                        # 0, 0, 0
-                                    # ],
-                   # "cost": 3.70
-                   # },
-                   # {"name": 'action_2',
-                   # "time_of_reduction": [
-                                        # 0, 0, 0, 
-                                        # 5, 5, 5, 
-                                        # 5, 5, 5, 
-                                        # 0, 0, 0, 
-                                        # 0, 0, 0
-                                    # ],
-                   # "reduction_rate": [
-                                    # 0, 0, 0, 
-                                    # 0.1, 0.1, 0.1,
-                                    # 0.1, 0.1, 0.1,
-                                    # 0, 0, 0, 
-                                    # 0, 0, 0
-                                    # ],
-                   # "cost": 3.70
-                   # },
-        # ]
+        actions = [{"name": 'action_1',
+                   "time_of_reduction": {
+                                        "2":[5, 5, 5],
+                                        "3":[5, 5, 5]
+                                    },
+                   "reduction_rate":    {
+                                        "2":[0.1, 0.1, 0.1],
+                                        "3":[0.1, 0.1, 0.1]
+                                    },
+                   "cost": 3.70
+                   },
+                   {"name": 'action_2',
+                   "time_of_reduction": {
+                                        "2":[5, 5, 5],
+                                        "3":[5, 5, 5]
+                                    },
+                   "reduction_rate": {
+                                    "2":[0.1, 0.1, 0.1],
+                                    "3":[0.1, 0.1, 0.1]
+                                    },
+                   "cost": 3.70
+                   },
+        ]
         
-        # data['maintenanceFile'] =  FileStorage(io.BytesIO(bytes(json.dumps(actions), 'utf-8')), 'ActionsEffects.json')
+        data['maintenanceFile'] =  FileStorage(io.BytesIO(bytes(json.dumps(actions), 'utf-8')), 'ActionsEffects.json')
         
-        # data['result_id'] = json.dumps('test')
+        data['result_id'] = json.dumps('test')
         
-        # np.random.seed(1)
-        # response = self.client.post('/optimization',
-                               # data=data,
-                               # content_type='multipart/form-data',
-                               # follow_redirects=True,
-                               # )
+        np.random.seed(1)
+        response = self.client.post('/optimization',
+                               data=data,
+                               content_type='multipart/form-data',
+                               follow_redirects=True,
+                               )
         
-        # print(response.data.decode('utf-8'))
-        #Performance = json.loads(response.data.decode('utf-8'))['Performance']
-        # Cost = json.loads(response.data.decode('utf-8'))['Cost']
+        
+        Performance = json.loads(response.data.decode('utf-8'))['Performance']
+        Cost = json.loads(response.data.decode('utf-8'))['Cost']
         
         # self.assertAlmostEqual(Performance[0], 100.10000000000007, places=4)
         # self.assertAlmostEqual(Performance[-1], 71.99999999999995, places=4)
