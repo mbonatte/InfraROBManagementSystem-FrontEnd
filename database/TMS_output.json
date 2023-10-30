@@ -1,0 +1,66 @@
+{
+    "Road_1_1": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+    "Road_1_2": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+    "Road_1_3": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+    "Road_2_1": {
+        "Crack sealing": 5,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_2_2": {
+        "Crack sealing": 5,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_4_1": {
+        "Crack sealing": 5,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_5_1": {
+        "Crack sealing": 5,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_4_2": {
+        "Crack sealing": 5,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_5_2": {
+        "Crack sealing": 5,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_6_1": {
+        "Crack sealing": 5,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_3_1": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+    "Road_3_2": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+    "Road_3_3": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+    "Road_3_4": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+    "Road_7_1": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 10
+        },
+    "Road_7_2": {
+        "Crack sealing": 50,
+        "Milling (5cm) + TC + RC": 100
+        },
+}

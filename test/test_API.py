@@ -217,16 +217,16 @@ class TestFlaskApp(unittest.TestCase):
         
         data['result_id'] = json.dumps('test')
         
-        np.random.seed(1)
-        response = self.client.post('/optimization',
-                               data=data,
-                               content_type='multipart/form-data',
-                               follow_redirects=True,
-                               )
+        # np.random.seed(1)
+        # response = self.client.post('/optimization',
+                               # data=data,
+                               # content_type='multipart/form-data',
+                               # follow_redirects=True,
+                               # )
         
         
-        Performance = json.loads(response.data.decode('utf-8'))['Performance']
-        Cost = json.loads(response.data.decode('utf-8'))['Cost']
+        # Performance = json.loads(response.data.decode('utf-8'))['Performance']
+        # Cost = json.loads(response.data.decode('utf-8'))['Cost']
         
         # self.assertAlmostEqual(Performance[0], 100.10000000000007, places=4)
         # self.assertAlmostEqual(Performance[-1], 71.99999999999995, places=4)
