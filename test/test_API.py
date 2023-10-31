@@ -14,11 +14,6 @@ import numpy as np
 from app import app
 from werkzeug.datastructures import FileStorage
 
-# from numba import njit
-# @njit
-# def set_seed(value):
-    # np.random.seed(value)
-
 class TestFlaskApp(unittest.TestCase):
     def setUp(self):
         self.ctx = app.app_context()
