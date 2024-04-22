@@ -1,6 +1,8 @@
+import io
 import uuid
 import json
 
+import numpy as np
 import pandas as pd
 
 from pathlib import Path
@@ -125,18 +127,23 @@ def convert_post():
     if ('inspectionsFile' not in request.files and 'propertiesFile' not in request.files):
         return jsonify({'error': 'No file uploaded'}), 400
         
-    inspections_file = request.files['inspectionsFile']
-    inspections_data = inspections_file.read().decode('utf-8')
-    properties_file = request.files['propertiesFile']
-    properties_data = properties_file.read().decode('utf-8')
+    inspections_file = request.files['inspectionsFile'].read().decode('utf-8')
+    inspections  = pd.read_csv(io.StringIO(inspections_file), sep=',').to_dict(orient='list')
+
+    properties_file = request.files['propertiesFile'].read().decode('utf-8')
+    properties  = pd.read_csv(io.StringIO(properties_file), sep=',').to_dict(orient='list')
+    
     institution = json.loads(request.form['institution'])
     
-    json_data = get_converted_IC(inspections_data,
-                                 properties_data,
+    json_data = get_converted_IC(inspections,
+                                 properties,
                                  institution,
                                  )
                                     
-    response = jsonify(json_data)
+    # Convert all numpy arrays to lists
+    json_ready_dict = {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in json_data.items()}
+    
+    response = jsonify(json_ready_dict)
     response.content_type = 'application/json'
     return response
 
