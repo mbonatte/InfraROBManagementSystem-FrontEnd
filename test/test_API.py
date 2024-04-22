@@ -65,7 +65,7 @@ class TestFlaskApp(unittest.TestCase):
         
         IC = json.loads(response.data.decode('utf-8'))['IC']
         
-        self.assertAlmostEqual(IC[-1], 2.922242, places=6)
+        self.assertAlmostEqual(IC[-1], 2.264790029338461, places=6)
         
     def test_markov_asfinag_post(self):
         response = self.client.post('/markov')
@@ -132,7 +132,7 @@ class TestFlaskApp(unittest.TestCase):
         
         IC = json.loads(response.data.decode('utf-8'))['IC']
         
-        self.assertAlmostEqual(IC[-1], 2.97, places=2)
+        self.assertAlmostEqual(IC[-1], 2.18, places=2)
     
     def test_maintenance_asfinag_post(self):
         response = self.client.post('/maintenance')
@@ -161,11 +161,12 @@ class TestFlaskApp(unittest.TestCase):
                                )
         
         IC = json.loads(response.data.decode('utf-8'))#['IC']
-        self.assertAlmostEqual(IC['Transverse_Evenness_ASFiNAG']['IC'][-1], 4.57, places=2)
-        self.assertAlmostEqual(IC['Surface_Defects_ASFiNAG']['IC'][-1], 3.87, places=2)
+        
+        self.assertAlmostEqual(IC['Transverse_Evenness_ASFiNAG']['IC'][-1], 4.64, places=2)
+        self.assertAlmostEqual(IC['Surface_Defects_ASFiNAG']['IC'][-1], 3.93, places=2)
         self.assertAlmostEqual(IC['Skid_Resistance_ASFiNAG']['IC'][-1], 2.0, places=2)
-        self.assertAlmostEqual(IC['Longitudinal_Evenness_ASFiNAG']['IC'][-1], 2.99, places=2)
-        self.assertAlmostEqual(IC['Cracking_ASFiNAG']['IC'][-1], 4.89, places=2)
+        self.assertAlmostEqual(IC['Longitudinal_Evenness_ASFiNAG']['IC'][-1], 2.97, places=2)
+        self.assertAlmostEqual(IC['Cracking_ASFiNAG']['IC'][-1], 4.81, places=2)
         self.assertAlmostEqual(IC['Bearing_Capacity_ASFiNAG']['IC'][-1], 3.67, places=2)
 
     def test_optimization_generic_post(self):

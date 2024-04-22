@@ -10,10 +10,10 @@ from functools import wraps
 
 from flask import Flask, render_template, request, redirect, session, jsonify, send_file
 
-from InfraROBManagementSystem.convert.handle_convert import get_converted_IC
-from InfraROBManagementSystem.handle_prediction import get_IC_through_time, get_IC_through_time_for_road
-from InfraROBManagementSystem.handle_maintenance import get_IC_through_time_maintenance, get_IC_through_time_maintenance_road
-from InfraROBManagementSystem.handle_optimization import get_pareto_curve, get_pareto_curve_all_roads
+from handle.handle_convert import get_converted_IC
+from handle.handle_prediction import get_IC_through_time, get_IC_through_time_for_road
+from handle.handle_maintenance import get_IC_through_time_maintenance, get_IC_through_time_maintenance_road
+from handle.handle_optimization import get_pareto_curve, get_pareto_curve_all_roads
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key1'
