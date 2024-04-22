@@ -11,7 +11,7 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, session, jsonify, send_file
 
 from handle.handle_convert import get_converted_IC
-from handle.handle_prediction import get_IC_through_time, get_IC_through_time_for_road
+from handle.handle_prediction import get_IC_through_time, get_IC_through_time_for_road, handle_PMS_prediction
 from handle.handle_maintenance import get_IC_through_time_maintenance, get_IC_through_time_maintenance_road
 from handle.handle_optimization import get_pareto_curve, get_pareto_curve_all_roads
 
@@ -343,6 +343,24 @@ def submit_info():
     except KeyError:
         return jsonify({'error': 'No result found'}), 404
 
+@app.route('/prediction', methods=['POST'])
+def prediction_post():
+    data = json.loads(request.json)
+
+    thetas = data['prediction_thetas']
+    actions = data['actions_effect']
+    road_properties = data['road_properties']
+    prediction_settings = data['prediction_settings']
+    
+    ASFiNAG_indicators = handle_PMS_prediction(
+        road_properties,
+        thetas,
+        actions,
+        **prediction_settings)
+    
+    response = jsonify(ASFiNAG_indicators)
+    response.content_type = 'application/json'
+    return response
 
 
 if __name__ == '__main__':

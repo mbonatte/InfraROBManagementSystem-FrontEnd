@@ -40,6 +40,182 @@ class TestFlaskApp(unittest.TestCase):
         response = self.client.post("/", data={"content": "hello world"})
         assert response.status_code == 405
     
+    def test_PMS_prediction(self):
+        # Create a FormData-like dictionary
+        json_request = {
+            "prediction_thetas": [
+                {
+                    "Street_Category": "highway",
+                    "thetas": {
+                        "Bearing_Capacity": [0.0186, 0.0256, 0.0113, 0.0420],
+                        "Cracking":[0.0736, 0.1178, 0.1777, 0.3542],
+                        "Longitudinal_Evenness": [0.0671, 0.0390, 0.0489, 0.0743],
+                        "Skid_Resistance": [0.1773, 0.2108, 0.1071, 0.0765],
+                        "Transverse_Evenness": [0.1084, 0.0395, 0.0443, 0.0378],
+                        "Surface_Defects": [0.1, 0.1, 0.1, 0.1]
+                        }
+                }
+            ],
+            "actions_effect": [
+                {
+                    "name": "rebuild",
+                    "cost": 50,
+                    "Cracking": {
+                        "improvement": {
+                            "2": [1, 1, 1],
+                            "3": [2, 2, 2],
+                            "4": [3, 3, 3],
+                            "5": [4, 4, 4]
+                        }
+                    },
+                    "Surface_Defects": {
+                        "improvement": {
+                            "2": [1, 1, 1],
+                            "3": [2, 2, 2],
+                            "4": [3, 3, 3],
+                            "5": [4, 4, 4]
+                        }
+                    },
+                    "Skid_Resistance": {
+                        "improvement": {
+                            "2": [1, 1, 1],
+                            "3": [2, 2, 2],
+                            "4": [3, 3, 3],
+                            "5": [4, 4, 4]
+                        }
+                    },
+                    "Transverse_Evenness": {
+                        "improvement": {
+                            "2": [1, 1, 1],
+                            "3": [2, 2, 2],
+                            "4": [3, 3, 3],
+                            "5": [4, 4, 4]
+                        }
+                    },
+                    "Longitudinal_Evenness": {
+                        "improvement": {
+                            "2": [1, 1, 1],
+                            "3": [2, 2, 2],
+                            "4": [3, 3, 3],
+                            "5": [4, 4, 4]
+                        }
+                    },
+                    "Bearing_Capacity": {
+                        "improvement": {
+                            "2": [1, 1, 1],
+                            "3": [2, 2, 2],
+                            "4": [3, 3, 3],
+                            "5": [4, 4, 4]
+                        }
+                    }
+                },
+                {
+                    "name": "Crack sealing",
+                    "Bearing_Capacity": {
+                        "time_of_reduction":   {
+                            "2":[2, 2, 2],
+                            "3":[1, 1, 1]
+                        },
+                        "reduction_rate":  {
+                            "2":[0.2, 0.2, 0.2],
+                            "3":[0.2, 0.2, 0.2]
+                        }
+                    },
+                    "Cracking": {
+                        "time_of_reduction":   {
+                            "2":[2, 2, 2],
+                            "3":[2, 2, 2],
+                            "4":[1, 1, 1]
+                        },
+                        "reduction_rate":  {
+                            "2":[0.2, 0.2, 0.2],
+                            "3":[0.1, 0.1, 0.1],
+                            "4":[0.1, 0.1, 0.1]
+                        }
+                    },
+                    "Transverse_Evenness": {
+                        "time_of_reduction":    {
+                            "2":[2, 2, 2],
+                            "3":[1, 1, 1]},
+                        "reduction_rate":  {
+                            "2":[0.2, 0.2, 0.2],
+                            "3":[0.2, 0.2, 0.2]
+                            }
+                    },
+                    "cost": 3.70
+                },
+                {
+                    "name": "action_2",
+                    "cost": 5,
+                    "Bearing_Capacity": {
+                        "time_of_reduction": {
+                            "2": [5, 5, 5],
+                            "3": [5, 5, 5]
+                        },
+                        "reduction_rate":    {
+                            "2": [0.1, 0.1, 0.1],
+                            "3": [0.1, 0.1, 0.1]
+                        }
+                    },
+                    "Transverse_Evenness": {
+                        "time_of_reduction": {
+                            "2": [5, 5, 5],
+                            "3": [5, 5, 5]
+                        },
+                        "reduction_rate":    {
+                            "2": [0.1, 0.1, 0.1],
+                            "3": [0.1, 0.1, 0.1]
+                        }
+                    }
+                }
+            ],
+            "road_properties": {
+                "Section_Name": "road_1_1",
+                "Asphalt_Thickness": 3,
+                "Street_Category": "highway",
+                "Age": "01/01/2013",
+                "last_inspection": {
+                    "date": "12/01/2022",
+                    "Cracking":	0.006267501,
+                    "Surface_Defects": 1.048573308,
+                    "Transverse_Evenness": 0.644422995,
+                    "Longitudinal_Evenness": 1.017088364,
+                    "Skid_Resistance": 0.747573698,
+                    "Bearing_Capacity": 1.069231543
+                }
+            },
+            "prediction_settings": {
+                "number_of_samples": 100,
+                "time_horizon": 50
+            }
+        }
+
+        
+        random.seed(1)
+        response = self.client.post('/prediction',
+                                    json=json.dumps(json_request),
+                                    follow_redirects=True
+                                    )
+        
+        result = json.loads(response.data.decode('utf-8'))
+        
+        self.assertAlmostEqual(result['Transverse_Evenness'][-1], 3.54, places=6)
+        self.assertAlmostEqual(result['Surface_Defects'][-1],  4.61, places=6)
+        self.assertAlmostEqual(result['Skid_Resistance'][-1], 4.86, places=6)
+        self.assertAlmostEqual(result['Longitudinal_Evenness'][-1], 3.38, places=6)
+        self.assertAlmostEqual(result['Cracking'][-1], 4.65, places=6)
+        self.assertAlmostEqual(result['Bearing_Capacity'][-1], 2.04, places=6)
+        
+        self.assertAlmostEqual(result['Surface_Structural'][-1], 5, places=6)
+        self.assertAlmostEqual(result['Structural'][-1], 3.52, places=6)
+        
+        self.assertAlmostEqual(result['Comfort'][-1], 4.961457142857145, places=6)
+        self.assertAlmostEqual(result['Safety'][-1], 5, places=6)
+        self.assertAlmostEqual(result['Functional'][-1], 5, places=6)
+        
+        self.assertAlmostEqual(result['Global'][-1], 5, places=6)
+        
+    
     def test_markov_generic_post(self):
         response = self.client.post('/markov')
         assert response.status_code == 400

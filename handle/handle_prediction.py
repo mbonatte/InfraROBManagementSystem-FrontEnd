@@ -3,10 +3,14 @@ import numpy as np
 import pandas as pd
 
 from ams.prediction.markov import MarkovContinous
+from ams.performance.performance import Performance
 
 from InfraROBManagementSystem.convert.organization import Organization
+from InfraROBManagementSystem.convert.ASFiNAG import ASFiNAG
+from InfraROBManagementSystem.optimization.problem import InfraROBRoadProblem
 
 from handle.handle_convert_to_markov import convert_to_markov
+    
 
 def get_fitted_markov_model(data_markov_format, worst_IC, best_IC):
     markov_model = MarkovContinous(worst_IC,
@@ -135,3 +139,39 @@ def fit_predict_model(variables, indicator):
                                         best_IC=variables['best_IC'])
                                         
     return get_fitted_markov_model(df, variables['worst_IC'], variables['best_IC'])
+
+
+def handle_PMS_prediction(road_properties, thetas, actions, number_of_samples = 100, time_horizon = 50):
+    # Create one performance model for each indicator
+    performance_models = {}
+    road_category = road_properties['Street_Category']
+    
+    filtered_thetas = [theta['thetas'] for theta in thetas if theta["Street_Category"] == road_category][0]
+    
+    for key, theta in filtered_thetas.items():
+        markov = MarkovContinous(worst_IC=5, best_IC=1)
+        markov.theta = theta
+        filtered_actions = InfraROBRoadProblem.extract_indicator(key, actions)
+        performance_models[key] = Performance(markov, filtered_actions)
+
+    organization = ASFiNAG(road_properties)
+
+    InfraROB_problem = InfraROBRoadProblem(
+        performance_models = performance_models, 
+        organization = organization, 
+        time_horizon = time_horizon, 
+        number_of_samples = number_of_samples
+        )
+        
+
+    ASFiNAG_indicators = InfraROB_problem._get_performances({})
+    ASFiNAG_indicators = InfraROB_problem._calc_all_indicators([ASFiNAG_indicators])[0]
+    
+    def convert_to_list(obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        
+    for key, value in ASFiNAG_indicators.items():
+        ASFiNAG_indicators[key] = convert_to_list(value)
+
+    return ASFiNAG_indicators
