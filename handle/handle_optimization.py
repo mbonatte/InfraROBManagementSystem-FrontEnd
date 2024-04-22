@@ -9,6 +9,8 @@ from ams.performance.performance import Performance
 from ams.optimization.problem import MaintenanceSchedulingProblem
 from ams.optimization.multi_objective_optimization import Multi_objective_optimization
 
+from handle.handle_convert_to_markov import convert_to_markov
+
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
     def default(self, obj):
@@ -20,24 +22,6 @@ class NumpyEncoder(json.JSONEncoder):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
-def convert_to_markov(df, worst_IC, best_IC, time_block):
-    df['Data'] = pd.to_datetime(df['Data'], format='%d-%m-%Y')
-    column = df.keys()
-    df_markov = pd.DataFrame(columns=['Initial','Time','Final'])
-    road_sections = df[column[0]].unique()
-    for road_section in road_sections:
-        section = df[df[column[0]]==road_section]
-        section = section.sort_values(by=column[1])
-        for i in range(len(section)-1):
-            if worst_IC > best_IC:
-                if section.iloc[i][2] <= section.iloc[i+1][2]:
-                    time_between = (section.iloc[i+1][1] -  section.iloc[i][1]).total_seconds()
-                    if time_block == 'month':
-                        time_between = round(time_between*3.8052e-7)
-                    if time_block == 'year':
-                        time_between = round(time_between*3.171e-8)
-                    df_markov.loc[len(df_markov)] = [section.iloc[i][2], time_between, section.iloc[i+1][2]]
-    return df_markov.astype('int', errors = 'ignore')
 
 def get_markov_model(inspections, worst_IC, best_IC, time_block):
     buffer = io.StringIO(inspections)
@@ -69,7 +53,9 @@ def get_IC_through_time_maintenance(inspections, maintenance_data, maintenance_s
 
 def get_pareto_curve(inspections, maintenance_data, worst_IC, best_IC, time_block, time_horizon):
     markov_model = get_markov_model(inspections, worst_IC, best_IC, time_block)
-    problem = MaintenanceSchedulingProblem(markov_model, maintenance_data, time_horizon)
+    performance_model = Performance(markov_model, maintenance_data)
+    
+    problem = MaintenanceSchedulingProblem(performance_model, time_horizon)
 
     optimization = Multi_objective_optimization()
     optimization.set_problem(problem)

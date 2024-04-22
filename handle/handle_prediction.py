@@ -6,60 +6,7 @@ from ams.prediction.markov import MarkovContinous
 
 from InfraROBManagementSystem.convert.organization import Organization
 
-def convert_to_markov(df, worst_IC, best_IC, time_block):
-    if worst_IC < best_IC: # Not implemented yet
-        return
-    
-    if time_block == 'month':
-        convert_sec_to_time_block = 3.8052e-7
-    if time_block == 'year':
-        convert_sec_to_time_block = 3.171e-8
-    
-    df['Data'] = pd.to_datetime(df['Data'], format='%d-%m-%Y')
-    column = df.keys()
-    df_markov = pd.DataFrame(columns=['Initial','Time','Final'])
-    road_sections = df[column[0]].unique()
-    for road_section in road_sections:
-        section = df[df[column[0]]==road_section]
-        section = section.sort_values(by=column[1])
-        for i in range(len(section)-1):
-            #if section.iloc[i][2] <= section.iloc[i+1][2]:
-            if section.iloc[i, 2] <= section.iloc[i + 1, 2]:
-                #time_between = (section.iloc[i+1][1] -  section.iloc[i][1]).total_seconds()
-                time_between = (section.iloc[i + 1, 1] - section.iloc[i, 1]).total_seconds()
-                time_between = round(time_between * convert_sec_to_time_block)
-                #df_markov.loc[len(df_markov)] = [section.iloc[i][2], time_between, section.iloc[i+1][2]]
-                df_markov.loc[len(df_markov)] = [section.iloc[i, 2], time_between, section.iloc[i + 1, 2]]
-    return df_markov.astype('int', errors = 'ignore')
-    
-
-def convert_to_markov_organization(df, worst_IC, best_IC, time_block='year'):
-    df.loc[:, 'Date'] = pd.to_datetime(df["Date"], format="%d/%m/%Y")
-    
-    column = df.keys()
-    df_markov = pd.DataFrame(columns=['Initial','Time','Final'])
-    road_sections = df[column[0]].unique()
-    
-    for road_section in road_sections:
-        section = df[df[column[0]]==road_section]
-        section = section.sort_values(by=column[1])
-        
-        for i in range(len(section)-1):
-            if worst_IC > best_IC:
-                #if section.iloc[i][2] <= section.iloc[i+1][2]:
-                if section.iloc[i, 2] <= section.iloc[i + 1, 2]:
-                    #time_between = (section.iloc[i+1][1] -  section.iloc[i][1]).total_seconds()
-                    time_between = (section.iloc[i + 1, 1] - section.iloc[i, 1]).total_seconds()
-                    if time_block == 'month':
-                        time_between = round(time_between*3.8052e-7)
-                    if time_block == 'year':
-                        time_between = round(time_between*3.171e-8)
-                    
-                    #df_markov.loc[len(df_markov)] = [section.iloc[i][2], time_between, section.iloc[i+1][2]]
-                    df_markov.loc[len(df_markov)] = [section.iloc[i, 2], time_between, section.iloc[i + 1, 2]]
-                    
-    return df_markov.astype('int', errors = 'ignore')
-
+from handle.handle_convert_to_markov import convert_to_markov
 
 def get_fitted_markov_model(data_markov_format, worst_IC, best_IC):
     markov_model = MarkovContinous(worst_IC,
@@ -71,7 +18,7 @@ def get_fitted_markov_model(data_markov_format, worst_IC, best_IC):
                      data_markov_format['Final'])
     return markov_model
 
-def get_IC_through_time(inspections, institution, worst_IC, best_IC, time_block, time_hoziron, asset_properties = None):
+def get_IC_through_time(inspections, institution, worst_IC, best_IC, time_block, time_horizon, asset_properties = None):
     response = {}
     if institution == 'Generic':
         buffer = io.StringIO(inspections)
@@ -80,8 +27,8 @@ def get_IC_through_time(inspections, institution, worst_IC, best_IC, time_block,
         markov_model = get_fitted_markov_model(data_markov_format, worst_IC, best_IC)
 
         initial_IC = best_IC
-        response['Year'] = list(range(0, time_hoziron + 1))
-        response['IC'] = list(markov_model.get_mean_over_time(time_hoziron,
+        response['Year'] = list(range(0, time_horizon + 1))
+        response['IC'] = list(markov_model.get_mean_over_time(time_horizon,
                                                            initial_IC))
     if institution == 'ASFiNAG':
         buffer = io.StringIO(inspections)
@@ -97,7 +44,7 @@ def get_IC_through_time(inspections, institution, worst_IC, best_IC, time_block,
                         'worst_IC': worst_IC,
                         'best_IC': best_IC,
                         'time_block': time_block,
-                        'time_hoziron': time_hoziron,
+                        'time_horizon': time_horizon,
                         'results': {}
                      }
         predict(variables)
@@ -106,7 +53,7 @@ def get_IC_through_time(inspections, institution, worst_IC, best_IC, time_block,
     
     return response
 
-def get_IC_through_time_for_road(road, institution, worst_IC, best_IC, time_block, time_hoziron, asset_properties = None):
+def get_IC_through_time_for_road(road, institution, worst_IC, best_IC, time_block, time_horizon, asset_properties = None):
     response = {}
 
     if institution == 'ASFiNAG':
@@ -117,7 +64,7 @@ def get_IC_through_time_for_road(road, institution, worst_IC, best_IC, time_bloc
                         'worst_IC': worst_IC,
                         'best_IC': best_IC,
                         'time_block': time_block,
-                        'time_hoziron': time_hoziron,
+                        'time_horizon': time_horizon,
                         'results': {}
                      }
     
@@ -148,8 +95,8 @@ def get_IC_through_time_for_road(road, institution, worst_IC, best_IC, time_bloc
         initial_IC = df_road[key].iloc[-1]
         markov_model.theta = theta
         variables['results'][key] = {}
-        variables['results'][key]['Time'] = [i for i in range(variables['time_hoziron']+1)]
-        variables['results'][key]['IC'] = list(markov_model.get_mean_over_time(variables['time_hoziron'],
+        variables['results'][key]['Time'] = [i for i in range(variables['time_horizon']+1)]
+        variables['results'][key]['IC'] = list(markov_model.get_mean_over_time(variables['time_horizon'],
                                                                                initial_IC))
     
     #predict(variables)
@@ -162,28 +109,28 @@ def get_IC_through_time_for_road(road, institution, worst_IC, best_IC, time_bloc
 
 def predict(variables):
     df_predict = pd.DataFrame()
-    df_predict['Time'] = np.arange(variables['time_hoziron']+1)
+    df_predict['Time'] = np.arange(variables['time_horizon']+1)
     predict_single_performance_index(variables)
     #self.predict_combined_performance_index(df_predict)
 
 def predict_single_performance_index(variables):
     indicators = variables['organization'].single_performance_index
     for indicator in indicators:
-        try:
+        # try:
             indicator = f"{indicator}_{variables['institution']}"
             model = fit_predict_model(variables, indicator)
             variables['results'][indicator] = {}
-            variables['results'][indicator]['Time'] = [i for i in range(variables['time_hoziron']+1)]
-            variables['results'][indicator]['IC'] = list(model.get_mean_over_time(variables['time_hoziron']))
-        except KeyError as e:
-            print('Error: ',e)
+            variables['results'][indicator]['Time'] = [i for i in range(variables['time_horizon']+1)]
+            variables['results'][indicator]['IC'] = list(model.get_mean_over_time(variables['time_horizon']))
+        # except KeyError as e:
+        #     print('Error: ',e)
 
 def fit_predict_model(variables, indicator):
     organization = variables['organization']
     df_properties = variables['properties']
     df_inspections = variables['inspections']
     df_standardized = pd.DataFrame(organization(df_properties).transform_performace_indicators(df_inspections))
-    df = convert_to_markov_organization(df_standardized[['Section_Name','Date', indicator]],
+    df = convert_to_markov(df_standardized[['Section_Name','Date', indicator]],
                                         worst_IC=variables['worst_IC'],
                                         best_IC=variables['best_IC'])
                                         

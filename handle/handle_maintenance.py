@@ -7,12 +7,13 @@ from ams.prediction.markov import MarkovContinous
 from ams.performance.performance import Performance
 
 from InfraROBManagementSystem.convert.organization import Organization
-from handle.handle_prediction import convert_to_markov, convert_to_markov_organization, get_fitted_markov_model
+from handle.handle_convert_to_markov import convert_to_markov
+from handle.handle_prediction import get_fitted_markov_model
 
 from pathlib import Path
 MAIN_FOLDER = Path(__file__).parent.parent.resolve()
 
-def get_IC_through_time_maintenance_road(road, institution, maintenance_scenario, maintenance_data, worst_IC, best_IC, time_block, time_hoziron):
+def get_IC_through_time_maintenance_road(road, institution, maintenance_scenario, maintenance_data, worst_IC, best_IC, time_block, time_horizon):
     response = {}
 
                          
@@ -24,7 +25,7 @@ def get_IC_through_time_maintenance_road(road, institution, maintenance_scenario
                         'worst_IC': worst_IC,
                         'best_IC': best_IC,
                         'time_block': time_block,
-                        'time_hoziron': time_hoziron,
+                        'time_horizon': time_horizon,
                         'maintenance_data': maintenance_data,
                         'actions_schedule': maintenance_scenario,
                         'results': {}
@@ -59,8 +60,8 @@ def get_IC_through_time_maintenance_road(road, institution, maintenance_scenario
         markov_model.theta = theta
         performance = Performance(markov_model, maintenance_data)
         variables['results'][indicator] = {}
-        variables['results'][indicator]['Time'] = [i for i in range(variables['time_hoziron']+1)]
-        variables['results'][indicator]['IC'] = list(performance.get_IC_over_time(variables['time_hoziron'],
+        variables['results'][indicator]['Time'] = [i for i in range(variables['time_horizon']+1)]
+        variables['results'][indicator]['IC'] = list(performance.get_IC_over_time(variables['time_horizon'],
                                                                             initial_IC=initial_IC,
                                                                             actions_schedule=maintenance_scenario,
                                                                             number_of_samples=100))
@@ -70,7 +71,7 @@ def get_IC_through_time_maintenance_road(road, institution, maintenance_scenario
     response = variables['results']
     return response
     
-def get_IC_through_time_maintenance(inspections, institution, maintenance_data, maintenance_scenario, worst_IC, best_IC, time_block, time_hoziron, asset_properties = None):
+def get_IC_through_time_maintenance(inspections, institution, maintenance_data, maintenance_scenario, worst_IC, best_IC, time_block, time_horizon, asset_properties = None):
 
     response = {}
     if institution == 'Generic':
@@ -88,8 +89,8 @@ def get_IC_through_time_maintenance(inspections, institution, maintenance_data, 
 
         initial_IC = best_IC
         response = {}
-        response['Year'] = list(range(0, time_hoziron + 1))
-        response['IC'] = list(performance.get_IC_over_time(time_hoziron,
+        response['Year'] = list(range(0, time_horizon + 1))
+        response['IC'] = list(performance.get_IC_over_time(time_horizon,
                                                            initial_IC = best_IC,
                                                            actions_schedule=maintenance_scenario,
                                                            number_of_samples=100)
@@ -109,7 +110,7 @@ def get_IC_through_time_maintenance(inspections, institution, maintenance_data, 
                         'worst_IC': worst_IC,
                         'best_IC': best_IC,
                         'time_block': time_block,
-                        'time_hoziron': time_hoziron,
+                        'time_horizon': time_horizon,
                         'maintenance_data': maintenance_data,
                         'actions_schedule': maintenance_scenario,
                         'results': {}
@@ -122,7 +123,7 @@ def get_IC_through_time_maintenance(inspections, institution, maintenance_data, 
 
 def predict(variables):
     df_predict = pd.DataFrame()
-    df_predict['Time'] = np.arange(variables['time_hoziron']+1)
+    df_predict['Time'] = np.arange(variables['time_horizon']+1)
     predict_single_performance_index(variables)
     #self.predict_combined_performance_index(df_predict)
 
@@ -135,8 +136,8 @@ def predict_single_performance_index(variables):
             model = fit_predict_model(variables, indicator)
             performance = Performance(model, maintenance_data)
             variables['results'][indicator] = {}
-            variables['results'][indicator]['Time'] = [i for i in range(variables['time_hoziron']+1)]
-            variables['results'][indicator]['IC'] = list(performance.get_IC_over_time(variables['time_hoziron'],
+            variables['results'][indicator]['Time'] = [i for i in range(variables['time_horizon']+1)]
+            variables['results'][indicator]['IC'] = list(performance.get_IC_over_time(variables['time_horizon'],
                                                                                       initial_IC = variables['best_IC'],
                                                                                       actions_schedule=variables['actions_schedule'],
                                                                                       number_of_samples=100
@@ -150,7 +151,7 @@ def fit_predict_model(variables, indicator):
     df_properties = variables['properties']
     df_inspections = variables['inspections']
     df_standardized = pd.DataFrame(organization(df_properties).transform_performace_indicators(df_inspections))
-    df = convert_to_markov_organization(df_standardized[['Section_Name','Date', indicator]],
+    df = convert_to_markov(df_standardized[['Section_Name','Date', indicator]],
                                         worst_IC=variables['worst_IC'],
                                         best_IC=variables['best_IC'])
     return get_fitted_markov_model(df, variables['worst_IC'], variables['best_IC'])
