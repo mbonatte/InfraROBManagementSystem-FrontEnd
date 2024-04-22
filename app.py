@@ -123,21 +123,12 @@ def logout():
     return redirect('/login')
 
 @app.route('/convert', methods=['POST'])
-def convert_post():
-    if ('inspectionsFile' not in request.files and 'propertiesFile' not in request.files):
-        return jsonify({'error': 'No file uploaded'}), 400
-        
-    inspections_file = request.files['inspectionsFile'].read().decode('utf-8')
-    inspections  = pd.read_csv(io.StringIO(inspections_file), sep=',').to_dict(orient='list')
+def convert_post():    
+    
+    data = request.get_json(force=True)
 
-    properties_file = request.files['propertiesFile'].read().decode('utf-8')
-    properties  = pd.read_csv(io.StringIO(properties_file), sep=',').to_dict(orient='list')
-    
-    institution = json.loads(request.form['institution'])
-    
-    json_data = get_converted_IC(inspections,
-                                 properties,
-                                 institution,
+    json_data = get_converted_IC(data['road_section'],
+                                 data['institution'],
                                  )
                                     
     # Convert all numpy arrays to lists
