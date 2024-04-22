@@ -110,36 +110,6 @@ def show_maps():
     
     return render_template('map.html', roads=road_properties, maintenanceActions=maintenanceActions)
 
-# @app.route('/inspections')
-# @login_required
-# def inspections():
-    # return render_template('inspections.html')
-    
-# @app.route('/convert', methods=['GET'])
-# @login_required
-# def convert():
-    # return render_template('convert.html')
-
-# @app.route('/markov', methods=['GET'])
-# @login_required
-# def markov():
-    # return render_template('markov.html')
-
-# @app.route('/maintenance', methods=['GET'])
-# @login_required
-# def maintenance():
-    # return render_template('maintenance.html')
-
-# @app.route('/about')
-# @login_required
-# def about():
-    # return render_template('home.html')
-
-# @app.route('/optimization', methods=['GET'])
-# @login_required
-# def optimization():
-    # return render_template('optimization.html')
-    
 @app.route('/config', methods=['GET'])
 @login_required
 def config_PMS():
@@ -345,17 +315,19 @@ def submit_info():
 
 @app.route('/prediction', methods=['POST'])
 def prediction_post():
-    data = json.loads(request.json)
+    data = request.get_json(force=True)
 
     thetas = data['prediction_thetas']
     actions = data['actions_effect']
+    action_schedule = data.get('action_schedule', {})
     road_properties = data['road_properties']
     prediction_settings = data['prediction_settings']
     
     ASFiNAG_indicators = handle_PMS_prediction(
-        road_properties,
-        thetas,
-        actions,
+        road_properties = road_properties,
+        thetas = thetas,
+        actions = actions,
+        action_schedule = action_schedule,
         **prediction_settings)
     
     response = jsonify(ASFiNAG_indicators)

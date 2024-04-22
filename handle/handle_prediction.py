@@ -141,20 +141,14 @@ def fit_predict_model(variables, indicator):
     return get_fitted_markov_model(df, variables['worst_IC'], variables['best_IC'])
 
 
-def handle_PMS_prediction(road_properties, thetas, actions, number_of_samples = 100, time_horizon = 50):
+def get_InfraROB_problem(thetas, actions, organization, number_of_samples, time_horizon):
     # Create one performance model for each indicator
-    performance_models = {}
-    road_category = road_properties['Street_Category']
-    
-    filtered_thetas = [theta['thetas'] for theta in thetas if theta["Street_Category"] == road_category][0]
-    
-    for key, theta in filtered_thetas.items():
+    performance_models = {}    
+    for key, theta in thetas.items():
         markov = MarkovContinous(worst_IC=5, best_IC=1)
         markov.theta = theta
         filtered_actions = InfraROBRoadProblem.extract_indicator(key, actions)
         performance_models[key] = Performance(markov, filtered_actions)
-
-    organization = ASFiNAG(road_properties)
 
     InfraROB_problem = InfraROBRoadProblem(
         performance_models = performance_models, 
@@ -162,16 +156,32 @@ def handle_PMS_prediction(road_properties, thetas, actions, number_of_samples = 
         time_horizon = time_horizon, 
         number_of_samples = number_of_samples
         )
-        
+    return InfraROB_problem
 
-    ASFiNAG_indicators = InfraROB_problem._get_performances({})
-    ASFiNAG_indicators = InfraROB_problem._calc_all_indicators([ASFiNAG_indicators])[0]
+def predict_all_indicators(problem, action_schedule):
+    indicators = problem._get_performances(action_schedule)
+    indicators = problem._calc_all_indicators([indicators])[0]
     
     def convert_to_list(obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         
-    for key, value in ASFiNAG_indicators.items():
-        ASFiNAG_indicators[key] = convert_to_list(value)
+    for key, value in indicators.items():
+        indicators[key] = convert_to_list(value)
 
-    return ASFiNAG_indicators
+    return indicators
+
+def handle_PMS_prediction(road_properties, thetas, actions, action_schedule={}, number_of_samples = 100, time_horizon = 50):
+    organization = ASFiNAG(road_properties)
+    road_category = organization.properties['Street_Category']
+    
+    filtered_thetas = [theta['thetas'] for theta in thetas if theta["Street_Category"] == road_category][0]
+    
+    InfraROB_problem = get_InfraROB_problem(filtered_thetas, actions, organization, number_of_samples, time_horizon)
+    
+    indicators = predict_all_indicators(InfraROB_problem, action_schedule)
+
+    return indicators
+        
+
+    
