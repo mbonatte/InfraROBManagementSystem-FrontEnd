@@ -141,7 +141,7 @@ def fit_predict_model(variables, indicator):
     return get_fitted_markov_model(df, variables['worst_IC'], variables['best_IC'])
 
 
-def get_InfraROB_problem(thetas, actions, organization, number_of_samples, time_horizon):
+def get_InfraROB_problem(thetas, actions, organization, initial_ICs, number_of_samples, time_horizon):
     # Create one performance model for each indicator
     performance_models = {}    
     for key, theta in thetas.items():
@@ -154,9 +154,18 @@ def get_InfraROB_problem(thetas, actions, organization, number_of_samples, time_
         performance_models = performance_models, 
         organization = organization, 
         time_horizon = time_horizon, 
-        number_of_samples = number_of_samples
+        number_of_samples = number_of_samples,
+        initial_ICs = initial_ICs
         )
     return InfraROB_problem
+
+def get_organization(road_properties, initial_ICs = {}):
+    organization = ASFiNAG(road_properties)
+    if initial_ICs:
+        print(organization.age)
+        organization.age = organization._calculate_dates_difference_in_years(organization.date_asphalt_surface, initial_ICs['date'])
+        print(organization.age)
+    return organization
 
 def predict_all_indicators(problem, action_schedule):
     indicators = problem._get_performances(action_schedule)
@@ -171,13 +180,17 @@ def predict_all_indicators(problem, action_schedule):
 
     return indicators
 
-def handle_PMS_prediction(road_properties, thetas, actions, action_schedule={}, number_of_samples = 100, time_horizon = 50):
-    organization = ASFiNAG(road_properties)
+def handle_PMS_prediction(road_properties, thetas, actions, 
+                          action_schedule={},
+                          initial_ICs = {},
+                          number_of_samples = 100, 
+                          time_horizon = 50):
+    organization = get_organization(road_properties, initial_ICs)
     road_category = organization.properties['street_category']
     
     filtered_thetas = [theta['thetas'] for theta in thetas if theta["street_category"] == road_category][0]
     
-    InfraROB_problem = get_InfraROB_problem(filtered_thetas, actions, organization, number_of_samples, time_horizon)
+    InfraROB_problem = get_InfraROB_problem(filtered_thetas, actions, organization, initial_ICs, number_of_samples, time_horizon)
     
     indicators = predict_all_indicators(InfraROB_problem, action_schedule)
 

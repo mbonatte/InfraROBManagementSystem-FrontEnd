@@ -143,15 +143,6 @@ class TestAPIPrediction(unittest.TestCase):
                 "total_pavement_thickness": 3,
                 "street_category": "highway",
                 "date_asphalt_surface": "01/01/2013",
-                # "last_inspection": {
-                #     "date": "12/01/2022",
-                #     "Cracking":	0.006267501,
-                #     "Surface_Defects": 1.048573308,
-                #     "Transverse_Evenness": 0.644422995,
-                #     "Longitudinal_Evenness": 1.017088364,
-                #     "Skid_Resistance": 0.747573698,
-                #     "Bearing_Capacity": 1.069231543
-                # }
             }
         
         self.json_request['prediction_settings'] = {
@@ -178,8 +169,45 @@ class TestAPIPrediction(unittest.TestCase):
         self.assertAlmostEqual(result['Cracking'][-1], 4.65, places=6)
         self.assertAlmostEqual(result['Bearing_Capacity'][-1], 2.04, places=6)
         
+        self.assertAlmostEqual(result['Surface_Structural'][10], 2.084, places=6)
         self.assertAlmostEqual(result['Surface_Structural'][-1], 5, places=6)
         self.assertAlmostEqual(result['Structural'][-1], 3.52, places=6)
+        
+        self.assertAlmostEqual(result['Comfort'][-1], 4.961457142857145, places=6)
+        self.assertAlmostEqual(result['Safety'][-1], 5, places=6)
+        self.assertAlmostEqual(result['Functional'][-1], 5, places=6)
+        
+        self.assertAlmostEqual(result['Global'][-1], 5, places=6)
+
+    def test_PMS_prediction_last_inspection(self):
+        self.json_request["initial_ICs"] = {
+                    "date": "12/01/2100",
+                    "Cracking":	1,
+                    "Surface_Defects": 1,
+                    "Transverse_Evenness": 1,
+                    "Longitudinal_Evenness": 1,
+                    "Skid_Resistance": 5,
+                    "Bearing_Capacity": 2
+                }
+        
+        random.seed(1)
+        response = self.client.post('/prediction',
+                                    data=json.dumps(self.json_request),
+                                    follow_redirects=True
+                                    )
+        
+        result = json.loads(response.data.decode('utf-8'))
+        
+        self.assertAlmostEqual(result['Transverse_Evenness'][-1], 3.54, places=6)
+        self.assertAlmostEqual(result['Surface_Defects'][-1],  4.61, places=6)
+        self.assertAlmostEqual(result['Skid_Resistance'][-1], 5, places=6)
+        self.assertAlmostEqual(result['Longitudinal_Evenness'][-1], 3.38, places=6)
+        self.assertAlmostEqual(result['Cracking'][-1], 4.65, places=6)
+        self.assertAlmostEqual(result['Bearing_Capacity'][-1], 2.99, places=6)
+        
+        self.assertAlmostEqual(result['Surface_Structural'][10], 2.084, places=6)
+        self.assertAlmostEqual(result['Surface_Structural'][-1], 5, places=6)
+        self.assertAlmostEqual(result['Structural'][-1], 3.995, places=6)
         
         self.assertAlmostEqual(result['Comfort'][-1], 4.961457142857145, places=6)
         self.assertAlmostEqual(result['Safety'][-1], 5, places=6)

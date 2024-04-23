@@ -315,6 +315,7 @@ def prediction_post():
     thetas = data['prediction_thetas']
     actions = data['actions_effect']
     action_schedule = data.get('action_schedule', {})
+    initial_ICs = data.get('initial_ICs', {})
     road_properties = data['road_properties']
     prediction_settings = data['prediction_settings']
     
@@ -323,6 +324,7 @@ def prediction_post():
         thetas = thetas,
         actions = actions,
         action_schedule = action_schedule,
+        initial_ICs = initial_ICs,
         **prediction_settings)
     
     response = jsonify(ASFiNAG_indicators)
