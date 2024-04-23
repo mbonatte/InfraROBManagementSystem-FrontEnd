@@ -6,7 +6,7 @@ import pandas as pd
 from ams.prediction.markov import MarkovContinous
 from ams.performance.performance import Performance
 
-from InfraROBManagementSystem.convert.organization import Organization
+from InfraROBManagementSystem.organization.organization import Organization
 from handle.handle_convert_to_markov import convert_to_markov
 from handle.handle_prediction import get_fitted_markov_model
 
@@ -150,7 +150,7 @@ def fit_predict_model(variables, indicator):
     organization = variables['organization']
     df_properties = variables['properties']
     df_inspections = variables['inspections']
-    df_standardized = pd.DataFrame(organization(df_properties).transform_performace_indicators(df_inspections))
+    df_standardized = pd.DataFrame(organization(df_properties).transform_performance_indicators(df_inspections))
     df = convert_to_markov(df_standardized[['Section_Name','Date', indicator]],
                                         worst_IC=variables['worst_IC'],
                                         best_IC=variables['best_IC'])

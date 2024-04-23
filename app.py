@@ -130,11 +130,8 @@ def convert_post():
     json_data = get_converted_IC(data['road_section'],
                                  data['institution'],
                                  )
-                                    
-    # Convert all numpy arrays to lists
-    json_ready_dict = {key: value.tolist() if isinstance(value, np.ndarray) else value for key, value in json_data.items()}
     
-    response = jsonify(json_ready_dict)
+    response = jsonify(json_data)
     response.content_type = 'application/json'
     return response
 
@@ -281,13 +278,13 @@ def optimization_post():
                                            )
 
     # Writing to optimization_output.json
-    path = THIS_FOLDER / 'database/optimization_output.json'
-    with open(path, "r+") as file:
-        data = json.load(file)
-        data[result_id] = optimization_output
-        file.seek(0)
-        file.write(json.dumps(data,
-                              indent=4))
+    # path = THIS_FOLDER / 'database/optimization_output.json'
+    # with open(path, "r+") as file:
+    #     data = json.load(file)
+    #     data[result_id] = optimization_output
+    #     file.seek(0)
+    #     file.write(json.dumps(data,
+    #                           indent=4))
     
     response = jsonify(optimization_output)
     response.content_type = 'application/json'

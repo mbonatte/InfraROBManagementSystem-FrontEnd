@@ -5,8 +5,8 @@ import pandas as pd
 from ams.prediction.markov import MarkovContinous
 from ams.performance.performance import Performance
 
-from InfraROBManagementSystem.convert.organization import Organization
-from InfraROBManagementSystem.convert.ASFiNAG import ASFiNAG
+from InfraROBManagementSystem.organization.organization import Organization
+from InfraROBManagementSystem.organization.ASFiNAG import ASFiNAG
 from InfraROBManagementSystem.optimization.problem import InfraROBRoadProblem
 
 from handle.handle_convert_to_markov import convert_to_markov
@@ -133,7 +133,7 @@ def fit_predict_model(variables, indicator):
     organization = variables['organization']
     df_properties = variables['properties']
     df_inspections = variables['inspections']
-    df_standardized = pd.DataFrame(organization(df_properties).transform_performace_indicators(df_inspections))
+    df_standardized = pd.DataFrame(organization(df_properties).transform_performance_indicators(df_inspections))
     df = convert_to_markov(df_standardized[['Section_Name','Date', indicator]],
                                         worst_IC=variables['worst_IC'],
                                         best_IC=variables['best_IC'])
@@ -173,9 +173,9 @@ def predict_all_indicators(problem, action_schedule):
 
 def handle_PMS_prediction(road_properties, thetas, actions, action_schedule={}, number_of_samples = 100, time_horizon = 50):
     organization = ASFiNAG(road_properties)
-    road_category = organization.properties['Street_Category']
+    road_category = organization.properties['street_category']
     
-    filtered_thetas = [theta['thetas'] for theta in thetas if theta["Street_Category"] == road_category][0]
+    filtered_thetas = [theta['thetas'] for theta in thetas if theta["street_category"] == road_category][0]
     
     InfraROB_problem = get_InfraROB_problem(filtered_thetas, actions, organization, number_of_samples, time_horizon)
     

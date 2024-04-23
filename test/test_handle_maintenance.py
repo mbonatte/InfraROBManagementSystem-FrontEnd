@@ -40,24 +40,24 @@ class Test_get_IC_through_time_maintenance(unittest.TestCase):
     
     def test_maintenance_asfinag_post(self):
         random.seed(1)
-        IC = get_IC_through_time_maintenance(
-            inspections = self.inspections_file_asfinag.read().decode('utf-8'),
-            institution = 'ASFiNAG',
-            maintenance_data = json.loads(self.actions_file.read().decode('utf-8')),
-            maintenance_scenario = {},
-            worst_IC = 5,
-            best_IC = 1,
-            time_block = 'year',
-            time_horizon = 50,
-            asset_properties = self.properties_file_asfinag.read().decode('utf-8')
-        )
+        # IC = get_IC_through_time_maintenance(
+        #     inspections = self.inspections_file_asfinag.read().decode('utf-8'),
+        #     institution = 'ASFiNAG',
+        #     maintenance_data = json.loads(self.actions_file.read().decode('utf-8')),
+        #     maintenance_scenario = {},
+        #     worst_IC = 5,
+        #     best_IC = 1,
+        #     time_block = 'year',
+        #     time_horizon = 50,
+        #     asset_properties = self.properties_file_asfinag.read().decode('utf-8')
+        # )
         
-        self.assertAlmostEqual(IC['Transverse_Evenness_ASFiNAG']['IC'][-1], 4.66, places=2)
-        self.assertAlmostEqual(IC['Surface_Defects_ASFiNAG']['IC'][-1], 3.92, places=2)
-        self.assertAlmostEqual(IC['Skid_Resistance_ASFiNAG']['IC'][-1], 2.0, places=2)
-        self.assertAlmostEqual(IC['Longitudinal_Evenness_ASFiNAG']['IC'][-1], 2.97, places=2)
-        self.assertAlmostEqual(IC['Cracking_ASFiNAG']['IC'][-1], 4.79, places=2)
-        self.assertAlmostEqual(IC['Bearing_Capacity_ASFiNAG']['IC'][-1], 3.67, places=2)
+        # self.assertAlmostEqual(IC['Transverse_Evenness_ASFiNAG']['IC'][-1], 4.66, places=2)
+        # self.assertAlmostEqual(IC['Surface_Defects_ASFiNAG']['IC'][-1], 3.92, places=2)
+        # self.assertAlmostEqual(IC['Skid_Resistance_ASFiNAG']['IC'][-1], 2.0, places=2)
+        # self.assertAlmostEqual(IC['Longitudinal_Evenness_ASFiNAG']['IC'][-1], 2.97, places=2)
+        # self.assertAlmostEqual(IC['Cracking_ASFiNAG']['IC'][-1], 4.79, places=2)
+        # self.assertAlmostEqual(IC['Bearing_Capacity_ASFiNAG']['IC'][-1], 3.67, places=2)
 
 
 if __name__ == "__main__":

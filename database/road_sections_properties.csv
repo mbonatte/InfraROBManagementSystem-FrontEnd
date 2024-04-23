@@ -1,4 +1,4 @@
-Section_Name,xi,yi,xf,yf,hasFOS,Construction_Type,Road_Category,Street_Category,Age,Total_Pavement_Thickness,Length,Width,Asphalt_Thickness,Traffic_Load,Design_Period,Frost_Index,Cumulative_Load
+Section_Name,xi,yi,xf,yf,hasFOS,construction_type,road_category,street_category,date_asphalt_surface,total_pavement_thickness,Length,Width,asphalt_surface_thickness,Traffic_Load,Design_Period,Frost_Index,Cumulative_Load
 Road_1_1,-4.25,55.86,-4.2481,55.865,TRUE,AS_N,primary,highway,01/01/2013,20,200,75,2,1,30,1,70
 Road_1_2,-8.289826,41.442642,-8.289168,41.442669,FALSE,AS_N,primary,highway,01/01/2013,20,200,75,2,"0,9",35,"0,8",45
 Road_1_3,-8.289168,41.442669,-8.287195,41.442814,FALSE,AS_N,primary,highway,01/01/2013,20,200,75,2,"0,9",35,"0,8",45

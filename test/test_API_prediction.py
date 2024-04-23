@@ -12,7 +12,7 @@ class TestAPIPrediction(unittest.TestCase):
 
         self.json_request = {}
         self.json_request['prediction_thetas'] = [{
-                    "Street_Category": "highway",
+                    "street_category": "highway",
                     "thetas": {
                         "Bearing_Capacity": [0.0186, 0.0256, 0.0113, 0.0420],
                         "Cracking":[0.0736, 0.1178, 0.1777, 0.3542],
@@ -139,18 +139,19 @@ class TestAPIPrediction(unittest.TestCase):
         
         self.json_request['road_properties'] = {
                 "Section_Name": "road_1_1",
-                "Asphalt_Thickness": 3,
-                "Street_Category": "highway",
-                "Age": "01/01/2013",
-                "last_inspection": {
-                    "date": "12/01/2022",
-                    "Cracking":	0.006267501,
-                    "Surface_Defects": 1.048573308,
-                    "Transverse_Evenness": 0.644422995,
-                    "Longitudinal_Evenness": 1.017088364,
-                    "Skid_Resistance": 0.747573698,
-                    "Bearing_Capacity": 1.069231543
-                }
+                "asphalt_surface_thickness": 3,
+                "total_pavement_thickness": 3,
+                "street_category": "highway",
+                "date_asphalt_surface": "01/01/2013",
+                # "last_inspection": {
+                #     "date": "12/01/2022",
+                #     "Cracking":	0.006267501,
+                #     "Surface_Defects": 1.048573308,
+                #     "Transverse_Evenness": 0.644422995,
+                #     "Longitudinal_Evenness": 1.017088364,
+                #     "Skid_Resistance": 0.747573698,
+                #     "Bearing_Capacity": 1.069231543
+                # }
             }
         
         self.json_request['prediction_settings'] = {
