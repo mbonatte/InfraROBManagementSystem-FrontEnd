@@ -8,7 +8,6 @@ const predictionModeIcon = document.getElementById('prediction-mode');
 const maintenanceModeIcon = document.getElementById('maintenance-mode');
 const optimizationModeIcon = document.getElementById('optimization-mode');
 
-
 function getCurrentMode(){
     mode = current_mode.innerHTML.split(' ')[2].split('<')[0];
     return mode;
@@ -226,11 +225,31 @@ async function postDataToServer() {
     // Send the formData to the server via a POST request
     // Fetch request for prediction based on road properties
     
-    const formData = new FormData();
-    formData.append('maintenance', JSON.stringify(maintenanceData));
-    formData.append('road', JSON.stringify(roadSelected));
-    const response = await fetch('/maintenance/road', {method: 'POST',
-                                                  body: formData});
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    
+    last_inspection = await convertLastInspection(roadSelected);
+    
+    raw = {}
+    
+    raw['prediction_settings'] = PREDICTION_SETTINGS;
+    raw['prediction_thetas'] = PREDICTION_THETAS;
+    raw['actions_effect'] = maintenanceActions;
+    raw['action_schedule'] = maintenanceData;
+    
+    raw['initial_ICs'] = last_inspection;
+    
+    raw['road_properties'] = roadSelected;
+    
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(raw),
+      redirect: "follow"
+    };
+    
+    const response = await fetch('/prediction', requestOptions);    
+    
     const prediction = await response.json();
     
     setChartMaintenanceMode(roadSelected, prediction);
@@ -479,16 +498,68 @@ function setChartVizualizeMode(road) {
     });
 };
 
+
+async function convertLastInspection(road) {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    
+    raw = {}
+    
+    raw["institution"] = "ASFiNAG";
+    raw["road_section"] = [road];
+    
+    const requestConvertOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(raw),
+      redirect: "follow"
+    };
+    
+    const response_con = await fetch('/convert', requestConvertOptions);
+    const converted = await response_con.json();
+    const last_inspection = converted[0]['inspections'][converted[0]['inspections'].length - 1];
+    
+    // Filter to only include properties with '_ASFiNAG'
+    const filteredData = Object.keys(last_inspection)
+        .filter(key => key.includes('_ASFiNAG'))
+        .reduce((obj, key) => {
+            const newKey = key.replace('_ASFiNAG', '');
+            obj[newKey] = last_inspection[key];
+            return obj;
+        }, {});
+        
+    filteredData["date"] = last_inspection["Date"];
+    
+    return filteredData
+};
+
 async function setChartPredictionMode(road) {  
     console.log(`DEBUGGING - setChartPredictionMode - ${road['Section_Name']}`);
     
     createChart('performanceChart', [], [], 'Year', '', road['Section_Name']);
     
-    // Fetch request for prediction based on road properties
-	const formData = new FormData();
-    formData.append('road', JSON.stringify(road));
-    const response = await fetch('/markov/road', {method: 'POST',
-                                                        body: formData});
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    
+    last_inspection = await convertLastInspection(road);
+    
+    raw = {}
+    
+    raw['prediction_settings'] = PREDICTION_SETTINGS;
+    raw['prediction_thetas'] = PREDICTION_THETAS;
+    raw['initial_ICs'] = last_inspection;
+    
+    raw['road_properties'] = road;
+    
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(raw),
+      redirect: "follow"
+    };
+    
+    const response = await fetch('/prediction', requestOptions);
+    
     const prediction = await response.json();
               
     PIList = Object.keys(prediction)
@@ -517,13 +588,12 @@ async function setChartPredictionMode(road) {
     indicator.addEventListener('change', () => {
         const performance_indicator = document.getElementById("indicator").value;
         
-        let dates =  prediction[performance_indicator]['Time'];
-        let performance =  prediction[performance_indicator]['IC']
+        let performance =  prediction[performance_indicator]
         
         // Use a loop to add the constant value to each element
         const new_dates = [];
-        for (let i = 0; i < dates.length; i++) {
-            new_dates.push(parseInt(dates[i]) + parseInt(year));
+        for (let i = 0; i < performance.length; i++) {
+            new_dates.push(i + parseInt(year));
         }
 
         createChart('performanceChart', new_dates, performance, 'Year', performance_indicator, road['Section_Name']);
@@ -559,13 +629,12 @@ function setChartMaintenanceMode(road, prediction) {
     performance_indicators.addEventListener('change', () => {
         const performance_indicator = document.getElementById("indicator").value;
         
-        let dates =  prediction[performance_indicator]['Time'];
-        let performance =  prediction[performance_indicator]['IC']
+        let performance =  prediction[performance_indicator];
         
         // Use a loop to add the constant value to each element
         const new_dates = [];
-        for (let i = 0; i < dates.length; i++) {
-            new_dates.push(parseInt(dates[i]) + parseInt(year));
+        for (let i = 0; i < performance.length; i++) {
+            new_dates.push(i + parseInt(year));
         }
 
         createChart('performanceChart', new_dates, performance, 'Year', performance_indicator, road['Section_Name']);

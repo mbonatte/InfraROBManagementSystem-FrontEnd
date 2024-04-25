@@ -6,7 +6,7 @@ import numpy as np
 
 from app import app
 
-class TestAPIPrediction(unittest.TestCase):
+class TestAPINetworkOptimization(unittest.TestCase):
     def setUp(self):
         self.ctx = app.app_context()
         self.ctx.push()
@@ -103,7 +103,7 @@ class TestAPIPrediction(unittest.TestCase):
     def test_PMS_prediction(self):
         np.random.seed(1)
         random.seed(1)
-        response = self.client.post('/optimization_network_PMS',
+        response = self.client.post('/optimization_network',
                                     data=json.dumps(self.json_request),
                                     follow_redirects=True
                                     )

@@ -1,148 +1,58 @@
-import io
-import json
-
 import numpy as np
-import pandas as pd
 
-from ams.prediction.markov import MarkovContinous
-from ams.performance.performance import Performance
-from ams.optimization.problem import MaintenanceSchedulingProblem
 from ams.optimization.multi_objective_optimization import Multi_objective_optimization
 
-from handle.handle_convert_to_markov import convert_to_markov
 from handle.utils import get_organization, get_InfraROB_problem, predict_all_indicators, convert_np_arrays_to_lists
 
-class NumpyEncoder(json.JSONEncoder):
-    """ Special json encoder for numpy types """
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+# def get_pareto_curve_all_roads(thetas, organization_name='ASFiNAG', number_of_samples = 100, time_horizon = 50):
+#     import json
+#     from pathlib import Path
+#     import pandas as pd
+#     from handle.handle_convert import get_converted_IC
+#     MAIN_FOLDER = Path(__file__).parent.parent.resolve()
+    
+#     path_properties = MAIN_FOLDER / './database/road_sections_properties.csv'
+#     road_properties = pd.read_csv(path_properties).to_dict('records')
+    
+#     path = MAIN_FOLDER / 'database/ActionsEffects.json'
+#     with open(path, "r") as file:
+#         maintenance_data = json.load(file)
+    
+#     optimization_outputs = {}
+    
+#     for road in enumerate(road_properties):
+#         converted_inspections = get_converted_IC(road, organization_name)
+#         initial_ICs = converted_inspections[0]['inspections'][-1]
+        
+#         organization = get_organization(road_properties, initial_ICs)
+#         road_category = organization.properties['street_category']
+        
+#         filtered_thetas = [theta['thetas'] for theta in thetas if theta["street_category"] == road_category][0]
+        
+#         InfraROB_problem = get_InfraROB_problem(filtered_thetas, maintenance_data, organization, initial_ICs, number_of_samples, time_horizon)
 
+#         optimization = Multi_objective_optimization()
+#         optimization.set_problem(InfraROB_problem)
 
-def get_markov_model(inspections, worst_IC, best_IC, time_block):
-    buffer = io.StringIO(inspections)
-    df  = pd.read_csv(buffer, sep=',')
-    data_markov_format = convert_to_markov(df, worst_IC, best_IC, time_block)
-    markov_model = MarkovContinous(worst_IC,
-                                   best_IC,
-                                   optimizer=True)
+#         optimization._set_algorithm(optimization_algorithm)
+#         optimization._set_termination(optimization_termination)
+        
+#         res = optimization.minimize()
+#         optimization_output = get_optimization_output(optimization, res)
+#         optimization_outputs[road['Section_Name']] = optimization_output
     
-    markov_model.fit(data_markov_format['Initial'],
-                     data_markov_format['Time'],
-                     data_markov_format['Final'])
-    return markov_model
-
-def get_IC_through_time_maintenance(inspections, maintenance_data, maintenance_scenario, worst_IC, best_IC, time_block, time_horizon):
+#     optimization_outputs = convert_np_arrays_to_lists(optimization_outputs)
     
-    markov_model = get_markov_model(inspections, worst_IC, best_IC, time_block, time_horizon)
-    performance = Performance(markov_model, maintenance_data)
-
-    initial_IC = best_IC
-    response = {}
-    response['Year'] = list(range(0, time_horizon + 1))
-    response['IC'] = list(performance.get_IC_over_time(time_horizon,
-                                                       initial_IC = best_IC,
-                                                       actions_schedule=maintenance_scenario,
-                                                       number_of_samples=100)
-                          )
-    return response
-
-def get_pareto_curve(inspections, maintenance_data, worst_IC, best_IC, time_block, time_horizon):
-    markov_model = get_markov_model(inspections, worst_IC, best_IC, time_block)
-    performance_model = Performance(markov_model, maintenance_data)
+#     # Writing to optimization_output.json
+#     path = MAIN_FOLDER / 'database/optimization_output_.json'
+#     with open(path, "r+") as file:
+#         data = json.load(file)
+#         data.update(optimization_outputs)
+#         file.seek(0)
+#         file.write(json.dumps(data,
+#                               indent=4))
     
-    problem = MaintenanceSchedulingProblem(performance_model, time_horizon)
-
-    optimization = Multi_objective_optimization()
-    optimization.set_problem(problem)
-
-    res = optimization.minimize()
-
-    X = res.X               # Design space values
-    F = res.F               # Objective spaces
-    opt = res.opt           # The solutions as a Population object.
-    pop = res.pop           # The final Population
-    history = res.history   # The history of the algorithm. (only if save_history has been enabled during the algorithm initialization)
-
-
-    #print("# Design space values\n", X)
-    #print(problem.decode_binary_to_dict(X))
-    #print("# Objective spaces\n", F)
-    #print('# The solutions as a Population object (X)\n', opt.get("X"))
-    #print('# The solutions as a Population object (F)\n', opt.get("F"))
-    #print('# The final Population (X)\n = ', pop.get("X"))
-    #print('# The final Population (F)\n = ', pop.get("F"))
-    #print(history)
- 
-    F = np.array(F).T
-    sort = np.argsort(F)[1]
-    
-    response = {}
-    
-    response['Performance'] = list(F[0][sort])
-    response['Cost'] = list(F[1][sort])
-    response['Actions_schedule'] = [problem._decode_solution(item) for item in X[sort]]
-    
-    response['Markov'] = []
-    performance_model = Performance(markov_model, maintenance_data)
-    for actions_schedule in response['Actions_schedule']:
-        result = {}
-        result['Time'] = list(range(0, time_horizon + 1))
-        result['IC'] = list(performance_model.get_IC_over_time(time_horizon=time_horizon,
-                                                                actions_schedule=actions_schedule
-                                                                )
-                            )
-        response['Markov'].append(result)
-    
-    response['Dummies'] = {}
-    response['Dummies']['Performance'] = list(np.array(pop.get("F")).T[0])
-    response['Dummies']['Cost'] = list(np.array(pop.get("F")).T[1])
-    return response
-
-def get_pareto_curve_all_roads():
-    from pathlib import Path
-    MAIN_FOLDER = Path(__file__).parent.parent.resolve()
-    
-    path_properties = MAIN_FOLDER / './database/road_sections_properties.csv'
-    road_properties = pd.read_csv(path_properties).to_dict('records')
-    
-    path = MAIN_FOLDER / 'database/ActionsEffects.json'
-    with open(path, "r") as file:
-        maintenance_data = json.load(file)
-    
-    time_horizon = 50
-    
-    markov_model = MarkovContinous(5, 1)
-    markov_model.theta = [0.0736, 0.1178, 0.1777, 0.3542]
-    problem = MaintenanceSchedulingProblem(markov_model, maintenance_data, time_horizon)
-
-    optimization = Multi_objective_optimization()
-    optimization.set_problem(problem)
-    
-    optimization_outputs = {}
-    
-    for road in road_properties:
-        res = optimization.minimize()
-        optimization_output = get_optimization_output(optimization, res)
-        optimization_outputs[road['Section_Name']] = optimization_output
-    
-    # Writing to optimization_output.json
-    path = MAIN_FOLDER / 'database/optimization_output_.json'
-    with open(path, "r+") as file:
-        data = json.load(file)
-        data.update(optimization_outputs)
-        file.seek(0)
-        file.write(json.dumps(data,
-                              indent=4,
-                              cls=NumpyEncoder))
-    
-    return {}
-    # return optimization_output
+#     return optimization_outputs
     
 def get_optimization_output(optimization, res):
     problem = optimization.problem
@@ -202,5 +112,5 @@ def handle_PMS_optimization(road_properties, thetas, actions,
     optimal_solutions = optimizer.minimize()
 
     optimization_output = get_optimization_output(optimizer, optimal_solutions)
-
+    
     return optimization_output

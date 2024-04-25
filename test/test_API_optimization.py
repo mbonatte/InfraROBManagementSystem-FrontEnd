@@ -6,6 +6,7 @@ import numpy as np
 
 from app import app
 
+
 class TestAPIPrediction(unittest.TestCase):
     def setUp(self):
         self.ctx = app.app_context()
@@ -168,10 +169,10 @@ class TestAPIPrediction(unittest.TestCase):
     def tearDown(self):
         self.ctx.pop()
     
-    def test_PMS_prediction(self):
+    def test_PMS_optimization(self):
         np.random.seed(1)
         random.seed(1)
-        response = self.client.post('/optimization_PMS',
+        response = self.client.post('/optimization',
                                     data=json.dumps(self.json_request),
                                     follow_redirects=True
                                     )
@@ -201,6 +202,32 @@ class TestAPIPrediction(unittest.TestCase):
             'Surface_Structural',
             'Transverse_Evenness']
         )
+
+        self.assertEqual(result['Prediction'][0]['IC']['Global'][0], 1.102087)
+
+    def test_PMS_optimization_last_inspection(self):
+        self.json_request["initial_ICs"] = {
+                    "date": "01/01/2020",
+                    "Cracking":	5,
+                    "Surface_Defects": 5,
+                    "Transverse_Evenness": 5,
+                    "Longitudinal_Evenness": 5,
+                    "Skid_Resistance": 5,
+                    "Bearing_Capacity": 5
+                }
+        
+        np.random.seed(1)
+        random.seed(1)
+        response = self.client.post('/optimization',
+                                    data=json.dumps(self.json_request),
+                                    follow_redirects=True
+                                    )
+        
+        result = json.loads(response.data.decode('utf-8'))
+        
+        self.assertAlmostEqual(result['Performance'][0], 255, places=6)
+        
+        self.assertEqual(result['Prediction'][0]['IC']['Global'][0], 5)
 
 
 if __name__ == "__main__":

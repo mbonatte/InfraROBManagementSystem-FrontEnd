@@ -6,14 +6,9 @@ from ams.optimization.multi_objective_optimization import Multi_objective_optimi
 from handle.utils import convert_np_arrays_to_lists
 
    
-def get_optimization_output(optimization, res):
-    problem = optimization.problem
-    roads_optimization = problem.section_optimization
-    
+def get_optimization_output(roads_optimization, res):
     X = res.X               # Design space values
     F = np.array(res.F).T   # Objective spaces
-    pop = res.pop           # The final Population
- 
     
     # Sort based on the first objective (performance)
     sort_indices = np.argsort(F[0])
@@ -63,6 +58,6 @@ def handle_PMS_network_optimization(road_optimization,
     
     optimal_solutions = optimizer.minimize()
 
-    optimization_output = get_optimization_output(optimizer, optimal_solutions)
+    optimization_output = get_optimization_output(road_optimization, optimal_solutions)
     
     return optimization_output

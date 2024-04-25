@@ -13,9 +13,8 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, session, jsonify, send_file
 
 from handle.handle_convert import get_converted_IC
-from handle.handle_prediction import get_IC_through_time, get_IC_through_time_for_road, handle_PMS_prediction
-from handle.handle_maintenance import get_IC_through_time_maintenance, get_IC_through_time_maintenance_road
-from handle.handle_optimization import get_pareto_curve, get_pareto_curve_all_roads, handle_PMS_optimization
+from handle.handle_prediction import handle_PMS_prediction
+from handle.handle_optimization import handle_PMS_optimization
 from handle.handle_optimization_network import handle_PMS_network_optimization
 
 app = Flask(__name__)
@@ -106,7 +105,7 @@ def show_maps():
         road['inspections'] = sorted(filtered_inspections, key=lambda d: datetime.strptime(d['Date'], "%d/%m/%Y"))
         
         road['optimization'] = road_optimizations[road['Section_Name']]
-        
+    
     path = THIS_FOLDER / 'database/ActionsEffects.json'
     with open(path, "r") as file:
         maintenanceActions = json.load(file)
@@ -136,164 +135,47 @@ def convert_post():
     response.content_type = 'application/json'
     return response
 
-@app.route('/markov', methods=['POST'])
-def markov_post():
-    if 'inspectionsFile' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
 
-    inspections_file = request.files['inspectionsFile']
-    inspections_data = inspections_file.read().decode('utf-8')
-
-    institution = json.loads(request.form['institution'])
-    worst_best_IC = json.loads(request.form['worst_best_IC'])
-    time_block = json.loads(request.form['time_block'])
-    time_horizon = json.loads(request.form['time_horizon'])
-
-    properties_data = None
-    if institution == 'ASFiNAG':
-        properties_file = request.files['propertiesFile']
-        properties_data = properties_file.read().decode('utf-8')
-
-    json_data = get_IC_through_time(
-        inspections_data,
-        institution,
-        worst_best_IC['worst_IC'],
-        worst_best_IC['best_IC'],
-        time_block,
-        time_horizon,
-        asset_properties=properties_data
-    )
-
-    response = jsonify(json_data)
-    response.content_type = 'application/json'
-    return response
-
-@app.route('/markov/road', methods=['POST'])
-def markov_post_road():
-    
-    road = json.loads(request.form['road'])
-
-    institution = 'ASFiNAG'
-    worst_best_IC = {'worst_IC': 5, 'best_IC':1}
-    time_block = 'year'
-    time_horizon = 50
-
-    json_data = get_IC_through_time_for_road(
-        road,
-        institution,
-        worst_best_IC['worst_IC'],
-        worst_best_IC['best_IC'],
-        time_block,
-        time_horizon
-    )
-
-    response = jsonify(json_data)
-    response.content_type = 'application/json'
-    return response
-
-@app.route('/maintenance/road', methods=['POST'])
-def maintenance_post_road():
-    
-    road = json.loads(request.form['road'])
-    maintenance_scenario = json.loads(request.form['maintenance'])
-    
-    institution = 'ASFiNAG'
-    worst_best_IC = {'worst_IC': 5, 'best_IC':1}
-    time_block = 'year'
-    time_horizon = 50
-    
-    path = THIS_FOLDER / 'database/ActionsEffects.json'
-    with open(path, "r") as file:
-        maintenance_data = json.load(file)
-
-    json_data = get_IC_through_time_maintenance_road(
-        road,
-        institution,
-        maintenance_scenario,
-        maintenance_data,
-        worst_best_IC['worst_IC'],
-        worst_best_IC['best_IC'],
-        time_block,
-        time_horizon,
-    )
-
-    response = jsonify(json_data)
-    response.content_type = 'application/json'
-    return response
-
-@app.route('/maintenance', methods=['POST'])
-def maintenance_post():
-    if ('inspectionsFile' not in request.files and 'maintenanceFile' not in request.files):
-        return jsonify({'error': 'No file uploaded'}), 400
-    inspections_file = request.files['inspectionsFile']
-    inspections_data = inspections_file.read().decode('utf-8')
-    
-    maintenance_file = request.files['maintenanceFile']
-    maintenance_data = json.loads(maintenance_file.read().decode('utf-8'))
-    
-    institution = json.loads(request.form['institution'])
-    worst_best_IC = json.loads(request.form['worst_best_IC'])
-    time_block = json.loads(request.form['time_block'])
-    time_horizon = json.loads(request.form['time_horizon'])
-    maintenance_scenario = json.loads(request.form['maintenanceScenario'])
-    
-    properties_data=None
-    if institution == 'ASFiNAG':
-        properties_file = request.files['propertiesFile']
-        properties_data = properties_file.read().decode('utf-8')
-    
-    json_data = get_IC_through_time_maintenance(inspections_data,
-                                                institution,
-                                                maintenance_data,
-                                                maintenance_scenario,
-                                                worst_best_IC['worst_IC'],
-                                                worst_best_IC['best_IC'],
-                                                time_block,
-                                                time_horizon,
-                                                asset_properties = properties_data)
-    response = jsonify(json_data)
-    response.content_type = 'application/json'
-    return response
       
-@app.route('/optimization', methods=['POST'])
-def optimization_post():
-    if ('inspectionsFile' not in request.files and 'maintenanceFile' not in request.files):
-        return jsonify({'error': 'No file uploaded'}), 400
-    inspections_file = request.files['inspectionsFile']
-    inspections_data = inspections_file.read().decode('utf-8')
+# @app.route('/optimization', methods=['POST'])
+# def optimization_post():
+#     if ('inspectionsFile' not in request.files and 'maintenanceFile' not in request.files):
+#         return jsonify({'error': 'No file uploaded'}), 400
+#     inspections_file = request.files['inspectionsFile']
+#     inspections_data = inspections_file.read().decode('utf-8')
     
-    maintenance_file = request.files['maintenanceFile']
-    maintenance_data = json.loads(maintenance_file.read().decode('utf-8'))
+#     maintenance_file = request.files['maintenanceFile']
+#     maintenance_data = json.loads(maintenance_file.read().decode('utf-8'))
 
-    worst_best_IC = json.loads(request.form['worst_best_IC'])
-    time_block = json.loads(request.form['time_block'])
-    time_horizon = json.loads(request.form['time_horizon'])
-    result_id = json.loads(request.form['result_id'])
+#     worst_best_IC = json.loads(request.form['worst_best_IC'])
+#     time_block = json.loads(request.form['time_block'])
+#     time_horizon = json.loads(request.form['time_horizon'])
+#     result_id = json.loads(request.form['result_id'])
 
-    optimization_output = get_pareto_curve(inspections_data,
-                                           maintenance_data,
-                                           int(worst_best_IC['worst_IC']),
-                                           int(worst_best_IC['best_IC']),
-                                           time_block,
-                                           int(time_horizon)
-                                           )
+#     optimization_output = get_pareto_curve(inspections_data,
+#                                            maintenance_data,
+#                                            int(worst_best_IC['worst_IC']),
+#                                            int(worst_best_IC['best_IC']),
+#                                            time_block,
+#                                            int(time_horizon)
+#                                            )
 
-    # Writing to optimization_output.json
-    # path = THIS_FOLDER / 'database/optimization_output.json'
-    # with open(path, "r+") as file:
-    #     data = json.load(file)
-    #     data[result_id] = optimization_output
-    #     file.seek(0)
-    #     file.write(json.dumps(data,
-    #                           indent=4))
+#     # Writing to optimization_output.json
+#     # path = THIS_FOLDER / 'database/optimization_output.json'
+#     # with open(path, "r+") as file:
+#     #     data = json.load(file)
+#     #     data[result_id] = optimization_output
+#     #     file.seek(0)
+#     #     file.write(json.dumps(data,
+#     #                           indent=4))
     
-    response = jsonify(optimization_output)
-    response.content_type = 'application/json'
-    return response
+#     response = jsonify(optimization_output)
+#     response.content_type = 'application/json'
+#     return response
 
-@app.route('/run_optimization', methods=['POST'])
-def run_optimization():
-    return get_pareto_curve_all_roads()
+# @app.route('/run_optimization', methods=['POST'])
+# def run_optimization():
+#     return get_pareto_curve_all_roads()
 
 @app.route("/get_optimization_result")
 def submit_info():
@@ -312,9 +194,9 @@ def submit_info():
 @app.route('/prediction', methods=['POST'])
 def prediction_post():
     data = request.get_json(force=True)
-
+    
     thetas = data['prediction_thetas']
-    actions = data['actions_effect']
+    actions = data.get('actions_effect', {})
     action_schedule = data.get('action_schedule', {})
     initial_ICs = data.get('initial_ICs', {})
     road_properties = data['road_properties']
@@ -332,7 +214,7 @@ def prediction_post():
     response.content_type = 'application/json'
     return response
 
-@app.route('/optimization_PMS', methods=['POST'])
+@app.route('/optimization', methods=['POST'])
 def optimization_PMS_post():
     data = request.get_json(force=True)
 
@@ -356,7 +238,7 @@ def optimization_PMS_post():
     response.content_type = 'application/json'
     return response
 
-@app.route('/optimization_network_PMS', methods=['POST'])
+@app.route('/optimization_network', methods=['POST'])
 def optimization_network_PMS_post():
     data = request.get_json(force=True)
 
