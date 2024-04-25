@@ -1,6 +1,8 @@
 import numpy as np
 from InfraROBManagementSystem.organization.organization import Organization
 
+from handle.utils import convert_np_arrays_to_lists
+
 def flatten_inspection_data(inspections):
     flattened_inspections = {key:[] for key in inspections[0].keys()}
     for inspection in inspections:
@@ -21,19 +23,7 @@ def unflatten_inspection_data(inspections):
     
     return inspection_list
 
-def convert_np_arrays_to_lists(data):
-    if isinstance(data, dict):
-        for key, value in data.items():
-            data[key] = convert_np_arrays_to_lists(value)
-    elif isinstance(data, list):
-        return [convert_np_arrays_to_lists(item) for item in data]
-    elif isinstance(data, np.ndarray):
-        return data.tolist()
-    elif isinstance(data, np.floating):
-        return float(data)
-    elif isinstance(data, np.integer):
-        return int(data)
-    return data
+
 
 def get_converted_IC(road_sections, organization_name):
     organization = Organization.set_organization(organization_name)

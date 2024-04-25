@@ -10,6 +10,7 @@ from InfraROBManagementSystem.organization.ASFiNAG import ASFiNAG
 from InfraROBManagementSystem.optimization.problem import InfraROBRoadProblem
 
 from handle.handle_convert_to_markov import convert_to_markov
+from handle.utils import get_organization, get_InfraROB_problem, predict_all_indicators, convert_np_arrays_to_lists
     
 
 def get_fitted_markov_model(data_markov_format, worst_IC, best_IC):
@@ -140,45 +141,6 @@ def fit_predict_model(variables, indicator):
                                         
     return get_fitted_markov_model(df, variables['worst_IC'], variables['best_IC'])
 
-
-def get_InfraROB_problem(thetas, actions, organization, initial_ICs, number_of_samples, time_horizon):
-    # Create one performance model for each indicator
-    performance_models = {}    
-    for key, theta in thetas.items():
-        markov = MarkovContinous(worst_IC=5, best_IC=1)
-        markov.theta = theta
-        filtered_actions = InfraROBRoadProblem.extract_indicator(key, actions)
-        performance_models[key] = Performance(markov, filtered_actions)
-
-    InfraROB_problem = InfraROBRoadProblem(
-        performance_models = performance_models, 
-        organization = organization, 
-        time_horizon = time_horizon, 
-        number_of_samples = number_of_samples,
-        initial_ICs = initial_ICs
-        )
-    return InfraROB_problem
-
-def get_organization(road_properties, initial_ICs = {}):
-    organization = ASFiNAG(road_properties)
-    if initial_ICs:
-        print(organization.age)
-        organization.age = organization._calculate_dates_difference_in_years(organization.date_asphalt_surface, initial_ICs['date'])
-        print(organization.age)
-    return organization
-
-def predict_all_indicators(problem, action_schedule):
-    indicators = problem._get_performances(action_schedule)
-    indicators = problem._calc_all_indicators([indicators])[0]
-    
-    def convert_to_list(obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        
-    for key, value in indicators.items():
-        indicators[key] = convert_to_list(value)
-
-    return indicators
 
 def handle_PMS_prediction(road_properties, thetas, actions, 
                           action_schedule={},

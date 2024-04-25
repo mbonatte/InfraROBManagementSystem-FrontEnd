@@ -15,7 +15,7 @@ from flask import Flask, render_template, request, redirect, session, jsonify, s
 from handle.handle_convert import get_converted_IC
 from handle.handle_prediction import get_IC_through_time, get_IC_through_time_for_road, handle_PMS_prediction
 from handle.handle_maintenance import get_IC_through_time_maintenance, get_IC_through_time_maintenance_road
-from handle.handle_optimization import get_pareto_curve, get_pareto_curve_all_roads
+from handle.handle_optimization import get_pareto_curve, get_pareto_curve_all_roads, handle_PMS_optimization
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key1'
@@ -326,6 +326,30 @@ def prediction_post():
         action_schedule = action_schedule,
         initial_ICs = initial_ICs,
         **prediction_settings)
+    
+    response = jsonify(ASFiNAG_indicators)
+    response.content_type = 'application/json'
+    return response
+
+@app.route('/optimization_PMS', methods=['POST'])
+def optimization_PMS_post():
+    data = request.get_json(force=True)
+
+    thetas = data['prediction_thetas']
+    actions = data['actions_effect']
+    initial_ICs = data.get('initial_ICs', {})
+    road_properties = data['road_properties']
+    prediction_settings = data['prediction_settings']
+    optimization_settings = data['optimization_settings']
+    
+    ASFiNAG_indicators = handle_PMS_optimization(
+        road_properties = road_properties,
+        thetas = thetas,
+        actions = actions,
+        initial_ICs = initial_ICs,
+        **prediction_settings,
+        **optimization_settings,
+        )
     
     response = jsonify(ASFiNAG_indicators)
     response.content_type = 'application/json'
