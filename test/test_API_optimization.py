@@ -168,6 +168,33 @@ class TestAPIOptimization(unittest.TestCase):
     def tearDown(self):
         self.ctx.pop()
     
+    def test_missing_fields(self):
+        # Test with missing prediction_thetas
+        request_data = {k: v for k, v in self.json_request.items() if k != 'prediction_thetas'}
+        response = self.client.post('/optimization',
+                                    data=json.dumps(request_data),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing required fields: prediction_thetas', response.data.decode())
+
+    def test_missing_key_actions_effect(self):
+        # Test with missing actions_effect
+        request_data = {k: v for k, v in self.json_request.items() if k != 'actions_effect'}
+        response = self.client.post('/optimization',
+                                    data=json.dumps(request_data),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing required fields: actions_effect', response.data.decode())
+
+    def test_invalid_field_content(self):
+        # Test with invalid content in prediction_thetas
+        self.json_request['prediction_thetas'] = "Not a list"
+        response = self.client.post('/optimization',
+                                    data=json.dumps(self.json_request),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 500)
+        self.assertIn('error', response.data.decode())
+    
     def test_PMS_optimization(self):
         np.random.seed(1)
         random.seed(1)

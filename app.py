@@ -125,27 +125,40 @@ def logout():
 
 @app.route('/convert', methods=['POST'])
 def convert_post():
-    data = request.get_json(force=True)
+    try:
+        data = request.get_json(force=True)
+        # Validate essential fields
+        if 'road_sections' not in data or 'institution' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
 
-    json_data = get_converted_IC(data['road_sections'],
-                                 data['institution'],
-                                 )
-    
-    response = jsonify(json_data)
-    response.content_type = 'application/json'
-    return response
+        json_data = get_converted_IC(data['road_sections'], data['institution'])
+        response = jsonify(json_data)
+        response.content_type = 'application/json'
+        return response
+    except KeyError as e:
+        return jsonify({'error': f'Missing key {e.args[0]}'}), 400
+    except Exception as e:
+        # General error handling (unexpected errors)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/fit_model', methods=['POST'])
-def fit_moder_post():    
-    data = request.get_json(force=True)
-    
-    json_data = get_fitted_model(data['institution'],
-                                 data['road_sections']
-                                 )
-    
-    response = jsonify(json_data)
-    response.content_type = 'application/json'
-    return response
+def fit_model_post():    
+    try:
+        data = request.get_json(force=True)
+        
+        # Validate essential fields
+        if 'institution' not in data or 'road_sections' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        json_data = get_fitted_model(data['institution'], data['road_sections'])
+        response = jsonify(json_data)
+        response.content_type = 'application/json'
+        return response
+    except KeyError as e:
+        return jsonify({'error': f'Missing key {e.args[0]}'}), 400
+    except Exception as e:
+        # General error handling (unexpected errors)
+        return jsonify({'error': str(e)}), 500
 
       
 # @app.route('/optimization', methods=['POST'])
@@ -204,67 +217,98 @@ def submit_info():
 
 @app.route('/prediction', methods=['POST'])
 def prediction_post():
-    data = request.get_json(force=True)
-    
-    thetas = data['prediction_thetas']
-    actions = data.get('actions_effect', {})
-    action_schedule = data.get('action_schedule', {})
-    initial_ICs = data.get('initial_ICs', {})
-    road_properties = data['road_properties']
-    prediction_settings = data['prediction_settings']
-    
-    ASFiNAG_indicators = handle_PMS_prediction(
-        road_properties = road_properties,
-        thetas = thetas,
-        actions = actions,
-        action_schedule = action_schedule,
-        initial_ICs = initial_ICs,
-        **prediction_settings)
-    
-    response = jsonify(ASFiNAG_indicators)
-    response.content_type = 'application/json'
-    return response
+    try:
+        data = request.get_json(force=True)
+        
+        # Validate essential fields
+        required_fields = ['prediction_thetas', 'road_properties', 'prediction_settings']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+
+        thetas = data['prediction_thetas']
+        actions = data.get('actions_effect', {})
+        action_schedule = data.get('action_schedule', {})
+        initial_ICs = data.get('initial_ICs', {})
+        road_properties = data['road_properties']
+        prediction_settings = data['prediction_settings']
+        
+        ASFiNAG_indicators = handle_PMS_prediction(
+            road_properties=road_properties,
+            thetas=thetas,
+            actions=actions,
+            action_schedule=action_schedule,
+            initial_ICs=initial_ICs,
+            **prediction_settings)
+        
+        response = jsonify(ASFiNAG_indicators)
+        response.content_type = 'application/json'
+        return response
+    except KeyError as e:
+        return jsonify({'error': f'Missing key {e.args[0]}'}), 400
+    except Exception as e:
+        # General error handling (unexpected errors)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/optimization', methods=['POST'])
 def optimization_PMS_post():
-    data = request.get_json(force=True)
+    try:
+        data = request.get_json(force=True)
+        
+        # Validate essential fields
+        required_fields = ['prediction_thetas', 'actions_effect', 'road_properties', 'prediction_settings', 'optimization_settings']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
 
-    thetas = data['prediction_thetas']
-    actions = data['actions_effect']
-    initial_ICs = data.get('initial_ICs', {})
-    road_properties = data['road_properties']
-    prediction_settings = data['prediction_settings']
-    optimization_settings = data['optimization_settings']
-    
-    ASFiNAG_indicators = handle_PMS_optimization(
-        road_properties = road_properties,
-        thetas = thetas,
-        actions = actions,
-        initial_ICs = initial_ICs,
-        **prediction_settings,
-        **optimization_settings,
-        )
-    
-    response = jsonify(ASFiNAG_indicators)
-    response.content_type = 'application/json'
-    return response
+        thetas = data['prediction_thetas']
+        actions = data['actions_effect']
+        initial_ICs = data.get('initial_ICs', {})
+        road_properties = data['road_properties']
+        prediction_settings = data['prediction_settings']
+        optimization_settings = data['optimization_settings']
+        
+        ASFiNAG_indicators = handle_PMS_optimization(
+            road_properties=road_properties,
+            thetas=thetas,
+            actions=actions,
+            initial_ICs=initial_ICs,
+            **prediction_settings,
+            **optimization_settings)
+        
+        response = jsonify(ASFiNAG_indicators)
+        response.content_type = 'application/json'
+        return response
+    except KeyError as e:
+        return jsonify({'error': f'Missing key {e.args[0]}'}), 400
+    except Exception as e:
+        # General error handling (unexpected errors)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/optimization_network', methods=['POST'])
 def optimization_network_PMS_post():
-    data = request.get_json(force=True)
+    try:
+        data = request.get_json(force=True)
 
-    road_optimization = data['road_optimization']
-    optimization_settings = data['optimization_settings']
-    
-    result = handle_PMS_network_optimization(
-        road_optimization = road_optimization,
-        **optimization_settings,
+        # Check for essential fields
+        if 'road_optimization' not in data or 'optimization_settings' not in data:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        road_optimization = data['road_optimization']
+        optimization_settings = data['optimization_settings']
+        
+        result = handle_PMS_network_optimization(
+            road_optimization=road_optimization,
+            **optimization_settings
         )
-    
-    response = jsonify(result)
-    response.content_type = 'application/json'
-    return response
-
+        
+        response = jsonify(result)
+        response.content_type = 'application/json'
+        return response
+    except KeyError as e:
+        return jsonify({'error': f'Missing key {e.args[0]}'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

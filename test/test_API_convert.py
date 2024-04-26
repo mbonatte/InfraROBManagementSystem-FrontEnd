@@ -12,6 +12,39 @@ class TestFlaskApp(unittest.TestCase):
     def tearDown(self):
         self.ctx.pop()
     
+    def test_missing_fields(self):
+        data = {}  # Empty data
+        response = self.client.post('/convert', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing required fields', response.data.decode())
+
+    def test_missing_field(self):
+        data = {
+            'institution': 'ASFiNAG',
+            # Missing 'road_sections' key
+        }
+        response = self.client.post('/convert', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing required fields', response.data.decode())
+    
+    def test_processing_key(self):
+        data = {
+            'institution': 'ASFiNAG',
+            'road_sections': [{}]
+        }
+        response = self.client.post('/convert', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing key inspections', response.data.decode())
+    
+    def test_processing_error_index_out_of_range(self):
+        data = {
+            'institution': 'ASFiNAG',
+            'road_sections': [{'inspections': []}]
+        }
+        response = self.client.post('/convert', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 500)
+        self.assertIn('error', response.data.decode())
+
     def test_convert_post_ASFiNAG(self):
         # Create a FormData-like dictionary
         data = {

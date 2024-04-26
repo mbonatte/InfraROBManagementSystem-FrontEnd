@@ -100,7 +100,34 @@ class TestAPINetworkOptimization(unittest.TestCase):
     def tearDown(self):
         self.ctx.pop()
     
-    def test_PMS_prediction(self):
+    def test_missing_fields(self):
+        # Test with missing road_optimization
+        request_data = {k: v for k, v in self.json_request.items() if k != 'road_optimization'}
+        response = self.client.post('/optimization_network',
+                                    data=json.dumps(request_data),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing required fields', response.data.decode())
+
+    def test_missing_key_optimization_settings(self):
+        # Test with missing optimization_settings
+        request_data = {k: v for k, v in self.json_request.items() if k != 'optimization_settings'}
+        response = self.client.post('/optimization_network',
+                                    data=json.dumps(request_data),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing required fields', response.data.decode())
+
+    def test_invalid_field_content(self):
+        # Test with invalid content in road_optimization
+        self.json_request['road_optimization'] = "Not a dictionary"
+        response = self.client.post('/optimization_network',
+                                    data=json.dumps(self.json_request),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 500)
+        self.assertIn('error', response.data.decode())
+    
+    def test_PMS_network_optimization(self):
         np.random.seed(1)
         random.seed(1)
         response = self.client.post('/optimization_network',

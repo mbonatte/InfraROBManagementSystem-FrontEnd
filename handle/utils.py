@@ -29,9 +29,7 @@ def get_InfraROB_problem(thetas, actions, organization, initial_ICs, number_of_s
 def get_organization(road_properties, initial_ICs = {}):
     organization = ASFiNAG(road_properties)
     if initial_ICs:
-        print(organization.age)
         organization.age = organization._calculate_dates_difference_in_years(organization.date_asphalt_surface, initial_ICs['date'])
-        print(organization.age)
     return organization
 
 def predict_all_indicators(problem, action_schedule):
