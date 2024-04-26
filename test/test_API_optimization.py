@@ -6,8 +6,7 @@ import numpy as np
 
 from app import app
 
-
-class TestAPIPrediction(unittest.TestCase):
+class TestAPIOptimization(unittest.TestCase):
     def setUp(self):
         self.ctx = app.app_context()
         self.ctx.push()

@@ -25,11 +25,14 @@ def get_optimization_output(roads_optimization, res):
 
     # Extract the actions schedules for each road
     actions_schedules = [road['Actions_schedule'] for road in roads_optimization.values()]    
+
+    # Extract the name for each road
+    road_names = list(roads_optimization.keys())
     
     # Extract schedules using sorted indices
     sorted_X = X[sort_indices]
     for x in sorted_X:
-        schedule = [actions_schedules[i][road_index] for i, road_index in enumerate(x)]
+        schedule = {road_names[i]: actions_schedules[i][road_index] for i, road_index in enumerate(x)}
         optimization_output['Actions_schedule'].append(schedule)
 
     # Extract dummy data directly using numpy operations

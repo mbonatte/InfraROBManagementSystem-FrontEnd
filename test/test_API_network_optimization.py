@@ -113,7 +113,8 @@ class TestAPINetworkOptimization(unittest.TestCase):
         np.testing.assert_array_almost_equal(result['Cost'], [70.0, 70.0, 60.0, 60.0, 40.0, 30.0, 20.0], decimal=6)
         np.testing.assert_array_almost_equal(result['Performance'], [50.0, 50.0, 60.0, 60.0, 80.0, 90.0, 100.0], decimal=6)
 
-        self.assertEqual(result['Actions_schedule'][0], [{'37': 'rebuild'}, {'26': 'Crack sealing'}])
+        self.assertEqual(list(result['Actions_schedule'][0].values()), [{'37': 'rebuild'}, {'26': 'Crack sealing'}])
+        self.assertEqual(list(result['Actions_schedule'][0].keys()), ['road_1', 'road_2'])
 
 
 if __name__ == "__main__":
