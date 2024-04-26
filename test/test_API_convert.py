@@ -16,7 +16,7 @@ class TestFlaskApp(unittest.TestCase):
         # Create a FormData-like dictionary
         data = {
             'institution': 'ASFiNAG',
-            'road_section': [
+            'road_sections': [
                 {
                     'Section_Name': 'Road_1_1',
                     'Construction_Type': 'AS_N',
@@ -70,9 +70,8 @@ class TestFlaskApp(unittest.TestCase):
         
         response = self.client.post('/convert',
                                data=json.dumps(data),
-                                    follow_redirects=True
+                                follow_redirects=True
                                )
-        
 
         result = json.loads(response.data.decode('utf-8'))
         

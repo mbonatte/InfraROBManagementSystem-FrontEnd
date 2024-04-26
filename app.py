@@ -13,6 +13,7 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, session, jsonify, send_file
 
 from handle.handle_convert import get_converted_IC
+from handle.handle_fit_model import get_fitted_model
 from handle.handle_prediction import handle_PMS_prediction
 from handle.handle_optimization import handle_PMS_optimization
 from handle.handle_optimization_network import handle_PMS_network_optimization
@@ -123,11 +124,10 @@ def logout():
     return redirect('/login')
 
 @app.route('/convert', methods=['POST'])
-def convert_post():    
-    
+def convert_post():
     data = request.get_json(force=True)
 
-    json_data = get_converted_IC(data['road_section'],
+    json_data = get_converted_IC(data['road_sections'],
                                  data['institution'],
                                  )
     
@@ -135,6 +135,17 @@ def convert_post():
     response.content_type = 'application/json'
     return response
 
+@app.route('/fit_model', methods=['POST'])
+def fit_moder_post():    
+    data = request.get_json(force=True)
+    
+    json_data = get_fitted_model(data['institution'],
+                                 data['road_sections']
+                                 )
+    
+    response = jsonify(json_data)
+    response.content_type = 'application/json'
+    return response
 
       
 # @app.route('/optimization', methods=['POST'])
