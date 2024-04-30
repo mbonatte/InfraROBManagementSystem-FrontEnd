@@ -506,7 +506,7 @@ async function convertLastInspection(road) {
     raw = {}
     
     raw["institution"] = "ASFiNAG";
-    raw["road_section"] = [road];
+    raw["road_sections"] = [road];
     
     const requestConvertOptions = {
       method: "POST",
