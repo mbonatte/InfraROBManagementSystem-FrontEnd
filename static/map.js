@@ -262,7 +262,7 @@ function displayRoadInfo(road) {
 
     table.innerHTML = `
         <tr>
-            <th colspan="2">${road.Section_Name}</th>
+            <th id="table-road-name" colspan="2">${road.Section_Name}</th>
         </tr>
         <tr>
             <th colspan="2">Properties</th>
@@ -277,15 +277,15 @@ function displayRoadInfo(road) {
         </tr>
         <tr>
             <td>Category</td>
-            <td>${road.Road_Category}</td>
+            <td>${road.road_category}</td>
         </tr>
         <tr>
             <td>Construction type</td>
-            <td>${road.Construction_Type}</td>
+            <td>${road.construction_type}</td>
         </tr>
         <tr>
-            <td>Construction date</td>
-            <td>${road.Age}</td>
+            <td>Construction date (Asphalt surface)</td>
+            <td>${road.date_asphalt_surface}</td>
         </tr>
         <tr>
             <th colspan="2">Condition</th>

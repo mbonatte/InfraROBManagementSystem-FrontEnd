@@ -104,9 +104,10 @@ def show_maps():
     for road in road_properties:
         filtered_inspections = [r for r in road_inpections if r['Section_Name'] == road['Section_Name']]
         road['inspections'] = sorted(filtered_inspections, key=lambda d: datetime.strptime(d['Date'], "%d/%m/%Y"))
-        
         road['optimization'] = road_optimizations[road['Section_Name']]
     
+    road_properties = get_converted_IC(road_properties, 'ASFiNAG')
+
     path = THIS_FOLDER / 'database/ActionsEffects.json'
     with open(path, "r") as file:
         maintenanceActions = json.load(file)

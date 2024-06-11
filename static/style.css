@@ -87,7 +87,6 @@ home li {
 #chart-wrapper {
   width: 100%;
   max-width: 500px;
-  margin: 0 auto;
 }
 
 
@@ -182,13 +181,12 @@ csl-entry {
 
 #map_canvas {
     border: 1px solid #000;
+    width: 100%; /* Use percentage to avoid hardcoding */
+    height: auto; /* Adjust height automatically */
 }
 
 .road-info {
-    /* display: flex; */
-    /* flex-direction: row; /* Display tables side by side */
-    margin-left: 20px; /* Add spacing between the canvas and tables */
-    /* margin-right: 20px; /* Add spacing between the canvas and tables */
+    margin: 0 auto;
     padding: 0px;
     text-align: center;
 }
@@ -196,11 +194,41 @@ csl-entry {
 .road-info table{
     border-collapse: collapse;
     font-size: 15px;
+    margin: 0 auto; /* Center the table */
+}
+
+.road-info th, .road-info td {
+  border: 1px solid #ddd; /* Add border to cells */
+  padding: 8px; /* Add padding to cells */
+  text-align: left; /* Align text to the left */
+}
+
+.road-info th {
+  background-color: #a9a9a9; /* Add background color to header */
+  font-weight: bold; /* Make header text bold */
+}
+
+#table-road-name {
+  background-color: #ff8c00; /* Add background color to header */
+}
+
+.road-info tr:nth-child(even) {
+  background-color: #f9f9f9; /* Add background color to even rows */
+}
+
+.road-info tr:hover {
+  background-color: #ddd; /* Add hover effect */
 }
 
 #big_div #chart-wrapper {
     border: 1px solid #000;
     margin-right: 0px;
+    width: 100%; /* Use percentage to avoid hardcoding */
+}
+
+#performanceChart {
+  width: 100%; /* Use percentage to avoid hardcoding */
+  height: auto; /* Adjust height automatically */
 }
 
 /* Legend */

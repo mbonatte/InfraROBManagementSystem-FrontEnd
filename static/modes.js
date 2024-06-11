@@ -498,7 +498,6 @@ function setChartVizualizeMode(road) {
     });
 };
 
-
 async function convertLastInspection(road) {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
